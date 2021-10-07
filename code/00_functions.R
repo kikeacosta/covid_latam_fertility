@@ -26,7 +26,9 @@ library(pacman)
 pkgs <- c("tidyverse",
           "here",
           "lubridate",
-          "mgcv")
+          "mgcv",
+          "ISOweek",
+          "readxl")
 
 # Install required CRAN packages if not available yet
 if(!sum(!p_isinstalled(c(pkgs)))==0) {
@@ -47,7 +49,6 @@ p_load(pkgs, character.only = TRUE)
 # ====
 
 
-
 # function for weekly population interpolation 
 # ============================================
 interpop <- function(db)
@@ -56,10 +57,10 @@ interpop <- function(db)
   ys <- db %>% drop_na() %>% pull(pop)
   # smoothing using cubic splines
   ts <- db %>% pull(t)
-  md2 <- smooth.spline(x = xs, y = ys)
-  inter_pop <- tibble(t = ts,
-                      pop2 = predict(md2, ts)$y)
-  return(inter_pop)
+  db2 <- 
+    db %>% 
+    mutate(pop2 = spline(xs, ys, xout = ts)$y)
+  return(db2)
 }
 # ====
 
@@ -70,7 +71,7 @@ interpop <- function(db)
 
 # fitting the model
 # ~~~~~~~~~~~~~~~~~
-est_baseline <- function(db, knots = 3){
+est_baseline <- function(db, knots = NA){
   
   
   if(!is.na(knots)){

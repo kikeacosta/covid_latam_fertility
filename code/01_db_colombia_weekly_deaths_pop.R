@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-=======
-
-library(tidyverse)
-library(readxl)
-library(ISOweek)
+source("Code/00_functions.R")
 
 col <- read_xlsx("data/colombia/anexos-defunciones-covid-dept-semana-35-2021.xlsx",
                  sheet = 2,
@@ -133,14 +128,63 @@ pop <-
   select(-area) %>% 
   gather(-DP, -dpto, -year, key = sex_age, value = pop) %>% 
   filter(!sex_age %in% c("Total Hombres", "Total Mujeres", "Total")) %>% 
-  separate(sex_age, c("sex", "age"), sep = "_")
+  separate(sex_age, c("sex", "age"), sep = "_") %>% 
+  mutate(dpto = recode(dpto,
+                       "Archipiélago de San Andrés, Providencia y Santa Catalina" = "San Andrés y Providencia",
+                       "Archipiélago de San Andrés" = "San Andrés y Providencia",
+                       "Bogotá, D.C." = "Bogotá",
+                       "Quindio" = "Quindío"))
 
 pop_all <- 
   pop %>% 
+  filter(sex == "Total") %>% 
   group_by(dpto, year) %>% 
   summarise(pop = sum(pop)) %>% 
-  ungroup()
-mutate(week = 27)
+  ungroup() %>% 
+  mutate(week = 27)
+
+# all_week <- 
+#   col4 %>% 
+#   select(year, week, date) %>% 
+#   unique()
+
+pop_interpol <- 
+  expand_grid(year = 2014:2022, week = 1:52, dpto = dptos) %>% 
+  bind_rows(expand_grid(year = c(2015, 2020), week = 53, dpto = dptos)) %>% 
+  arrange(dpto, year, week) %>% 
+  left_join(pop_all) %>% 
+  group_by(dpto) %>% 
+  mutate(t = 1:n()) %>% 
+  ungroup() %>% 
+  group_by(dpto) %>% 
+  do(interpop(db = .data))
+
+# visual inspection
+# ~~~~~~~~~~~~~~~~~
+
+pop_interpol %>% 
+  filter(dpto == "Bogotá") %>% 
+  ggplot()+
+  geom_line(aes(t, pop2))+
+  geom_point(aes(t, pop), col = "red")
+# weird case: San Andres
 
 
->>>>>>> 2a6373f258e0ecbd11abe548be51546a16fff92e
+pop_interpol2 <- 
+  pop_interpol %>% 
+  select(-pop, -t) %>% 
+  rename(pop = pop2)
+
+pop_interpol3 <- 
+  pop_interpol2 %>% 
+  group_by(year, week) %>% 
+  summarise(pop = sum(pop)) %>% 
+  ungroup() %>% 
+  mutate(dpto = "Total") %>% 
+  bind_rows(pop_interpol2)
+
+col_dts_pop <- 
+  col4 %>% 
+  left_join(pop_interpol3)
+
+write_rds(col_dts_pop, "output/colombia_deaths_population_2015_2021.rds")
