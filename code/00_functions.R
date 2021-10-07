@@ -47,6 +47,24 @@ p_load(pkgs, character.only = TRUE)
 # ====
 
 
+
+# function for weekly population interpolation 
+# ============================================
+interpop <- function(db)
+{
+  xs <- db %>% drop_na() %>% pull(t)
+  ys <- db %>% drop_na() %>% pull(pop)
+  # smoothing using cubic splines
+  ts <- db %>% pull(t)
+  md2 <- smooth.spline(x = xs, y = ys)
+  inter_pop <- tibble(t = ts,
+                      pop2 = predict(md2, ts)$y)
+  return(inter_pop)
+}
+# ====
+
+
+
 # functions for baseline mortality estimation
 # ===========================================
 

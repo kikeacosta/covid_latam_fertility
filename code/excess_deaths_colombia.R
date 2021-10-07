@@ -133,10 +133,11 @@ pop <-
   filter(!sex_age %in% c("Total Hombres", "Total Mujeres", "Total")) %>% 
   separate(sex_age, c("sex", "age"), sep = "_")
 
-pop_all_age_sex <- 
+pop_all <- 
   pop %>% 
   group_by(dpto, year) %>% 
   summarise(pop = sum(pop)) %>% 
   ungroup()
+mutate(week = 27)
 
-unique(pop$sex_age)
+
