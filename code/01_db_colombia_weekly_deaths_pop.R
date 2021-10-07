@@ -141,12 +141,7 @@ pop_all <-
   group_by(dpto, year) %>% 
   summarise(pop = sum(pop)) %>% 
   ungroup() %>% 
-  mutate(week = 27)
-
-# all_week <- 
-#   col4 %>% 
-#   select(year, week, date) %>% 
-#   unique()
+  mutate(week = 26)
 
 pop_interpol <- 
   expand_grid(year = 2014:2022, week = 1:52, dpto = dptos) %>% 
@@ -157,7 +152,8 @@ pop_interpol <-
   mutate(t = 1:n()) %>% 
   ungroup() %>% 
   group_by(dpto) %>% 
-  do(interpop(db = .data))
+  do(interpop(db = .data)) %>% 
+  ungroup()
 
 # visual inspection
 # ~~~~~~~~~~~~~~~~~
@@ -168,7 +164,6 @@ pop_interpol %>%
   geom_line(aes(t, pop2))+
   geom_point(aes(t, pop), col = "red")
 # weird case: San Andres
-
 
 pop_interpol2 <- 
   pop_interpol %>% 

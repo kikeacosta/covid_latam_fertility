@@ -1,29 +1,28 @@
 source("Code/00_functions.R")
 
-col_dts_pop <- read_rds("output/colombia_deaths_population_2015_2021.rds")
+bra_dts_pop <- read_rds("output/brazil_deaths_population_2015_2021.rds")
 
 
 last_date <- "2020-03-15"
 
-col_dts_pop2 <- 
-  col_dts_pop %>% 
+bra_dts_pop2 <- 
+  bra_dts_pop %>% 
   mutate(exposure = pop / 52) %>% 
-  arrange(dpto, date) %>% 
-  group_by(dpto) %>% 
+  arrange(state, date) %>% 
+  group_by(state) %>% 
   mutate(t = 1:n(),
          w = ifelse(date <= "2020-03-15", 1, 0)) %>% 
   ungroup()
 
 
-col_bsn <- 
-  col_dts_pop2 %>% 
-  group_by(dpto) %>% 
+bra_bsn <- 
+  bra_dts_pop2 %>% 
+  group_by(state) %>% 
   do(est_baseline(db = .data))
-  
 
-write_rds(col_bsn, "output/colombia_baseline_weekly_2015_2021.rds")
+write_rds(bra_bsn, "output/brazil_baseline_weekly_2015_2021.rds")
 
-col_bsn %>% 
+bra_bsn %>% 
   mutate(excess = ifelse(date > last_date & dts > ul, "y", "n")) %>% 
   ggplot()+
   geom_ribbon(aes(date, ymin = ll_r, ymax = ul_r), alpha = 0.2, fill = "#118ab2")+
@@ -38,7 +37,7 @@ col_bsn %>%
              size = 0.3)+
   scale_color_manual(values = c("#073b4c", "#ef476f"))+
   scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
-  facet_wrap(~ dpto, scales = "free", ncol = 1)+
+  facet_wrap(~ state, scales = "free", ncol = 1)+
   theme_bw()+
   theme(
     legend.position = "none",
@@ -49,7 +48,7 @@ col_bsn %>%
                               size = 7),
     strip.background = element_blank()
   )
-ggsave(here("figures", "colombia_baseline_weekly_deaths_by_state.pdf"),
+ggsave(here("figures", "brazil_baseline_weekly_deaths_by_state.pdf"),
        width = 10,
        height = 50,
        limitsize = FALSE)
