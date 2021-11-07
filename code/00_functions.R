@@ -92,15 +92,6 @@ est_baseline <- function(db, knots = NA){
           family = "quasipoisson")
   }
   
-  # base_gam <-
-  #   gam(Dx ~
-  #         t_p +
-  #         s(month, bs = 'cp') +
-  #         offset(log(Nx)),
-  #       weights = w,
-  #       data = db,
-  #       family = "quasipoisson")
-  
   resp <- predict(gam_model, newdata = db, type = "response")
   
   db %>% 
@@ -108,7 +99,8 @@ est_baseline <- function(db, knots = NA){
            p_score = dts / bsn,
            dts_r = dts / exposure,
            bsn_r = bsn / exposure) %>% 
-    left_join(simul_intvals(gam_model, db, 1000)) %>% 
+    left_join(simul_intvals(gam_model, db, 1000),
+              by = "date") %>% 
     mutate(ll_r = ll / exposure,
            ul_r = ul / exposure)
 }

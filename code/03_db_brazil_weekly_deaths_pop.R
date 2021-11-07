@@ -9,19 +9,19 @@ source(here("Code", "00_functions.R"))
 # States and municipality codes
 # =============================
 reg_codes <- 
-  read_csv("data/brazil/bra_state_codes_names.csv")
+  read_csv("data_input/brazil/bra_state_codes_names.csv")
 
 # loading deaths from microdata
 # =============================
 
-files <- paste0(here("data", "brazil"), "/Mortalidade_Geral_", 2015:2021, ".csv")
-
+csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
 out <- list()
-for (i in files){
+for (i in csv_files){
   cat(i)
-  out[[i]] <- read_delim(i,
-                         delim = ";",
-                         col_types = cols(.default = "c")) %>%
+  out[[i]] <- 
+    read_delim(i,
+               delim = ";",
+               col_types = cols(.default = "c")) %>%
     filter(TIPOBITO == "2") %>%
     select(date = DTOBITO, mun_code = CODMUNOCOR) %>%
     mutate(date = dmy(date),
@@ -36,10 +36,11 @@ for (i in files){
 
 dts <-
   out %>%
-  bind_rows() %>% 
+  bind_rows() %>%
   mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
          date = ISOweek2date(isoweek),
          state_num = state_num %>% as.double()) %>% 
+  filter(year >= 2015) %>% 
   left_join(reg_codes) %>% 
   select(-isoweek, -region, -state_num) %>% 
   rename(state = state_name)
@@ -56,15 +57,14 @@ dts_nal <-
   
 
 # saving daily deaths by state
-write_rds(dts_nal, "output/brazil_weekly_deaths_by_state_2015_2021.rds")
-
+write_rds(dts_nal, "data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
 # loading daily deaths by state
-dts_nal <- read_rds("output/brazil_weekly_deaths_by_state_2015_2021.rds")
+dts_nal <- read_rds("data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
 
 
 # reading population by state
 pop <- 
-  read_csv2("data/brazil/bra_population_state_2010_2025.csv",
+  read_csv2("data_input/brazil/bra_population_state_2010_2025.csv",
             skip = 3) %>% 
   drop_na(RO) %>% 
   rename(year = Ano) %>% 
@@ -111,7 +111,7 @@ bra_dts_pop <-
   left_join(pop_interpol3) %>% 
   arrange(state, date)
 
-write_rds(bra_dts_pop, "output/brazil_deaths_population_2015_2021.rds")
+write_rds(bra_dts_pop, "data_inter/brazil_deaths_population_2015_2021.rds")
 
   
   

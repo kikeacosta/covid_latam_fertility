@@ -19,9 +19,9 @@ col_bsn <-
   col_dts_pop2 %>% 
   group_by(dpto) %>% 
   do(est_baseline(db = .data))
-  
 
-write_rds(col_bsn, "output/colombia_baseline_weekly_2015_2021.rds")
+write_rds(col_bsn, "data_inter/colombia_baseline_weekly_2015_2021.rds")
+col_bsn <- read_rds("data_inter/colombia_baseline_weekly_2015_2021.rds")
 
 col_bsn %>% 
   mutate(excess = ifelse(date > last_date & dts > ul, "y", "n")) %>% 
@@ -53,3 +53,18 @@ ggsave(here("figures", "colombia_baseline_weekly_deaths_by_state.pdf"),
        width = 10,
        height = 50,
        limitsize = FALSE)
+
+# ====
+
+
+
+# mortality excess ====
+# ~~~~~~~~~~~~~~~~~~~~~
+col_exc <- 
+  col_bsn %>% 
+  filter(year >= 2020) %>% 
+  select(dpto, date, isoweek, dts, bsn, exposure) %>% 
+  mutate(excess = dts / bsn,
+         pscore = dts / bsn)
+
+write.csv(col_exc, "data_inter/colombia_weekly_excess_2020_2021.csv")
