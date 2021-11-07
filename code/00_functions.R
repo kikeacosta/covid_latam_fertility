@@ -71,7 +71,8 @@ interpop <- function(db)
 
 # fitting the model
 # ~~~~~~~~~~~~~~~~~
-est_baseline <- function(db, knots = NA){
+est_baseline <- 
+  function(db, knots = NA){
   
   
   if(!is.na(knots)){

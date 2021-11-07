@@ -2,7 +2,6 @@ source("Code/00_functions.R")
 
 col_dts_pop <- read_rds("output/colombia_deaths_population_2015_2021.rds")
 
-
 last_date <- "2020-03-15"
 
 col_dts_pop2 <- 
@@ -13,7 +12,6 @@ col_dts_pop2 <-
   mutate(t = 1:n(),
          w = ifelse(date <= "2020-03-15", 1, 0)) %>% 
   ungroup()
-
 
 col_bsn <- 
   col_dts_pop2 %>% 
