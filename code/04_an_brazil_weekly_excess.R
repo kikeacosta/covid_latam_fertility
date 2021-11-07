@@ -1,6 +1,6 @@
 source("Code/00_functions.R")
 
-bra_dts_pop <- read_rds("output/brazil_deaths_population_2015_2021.rds")
+bra_dts_pop <- read_rds("data_inter/brazil_deaths_population_2015_2021.rds")
 
 
 last_date <- "2020-03-15"
@@ -20,7 +20,7 @@ bra_bsn <-
   group_by(state) %>% 
   do(est_baseline(db = .data))
 
-write_rds(bra_bsn, "output/brazil_baseline_weekly_2015_2021.rds")
+write_rds(bra_bsn, "data_inter/brazil_baseline_weekly_2015_2021.rds")
 
 bra_bsn %>% 
   mutate(excess = ifelse(date > last_date & dts > ul, "y", "n")) %>% 
@@ -48,7 +48,22 @@ bra_bsn %>%
                               size = 7),
     strip.background = element_blank()
   )
-ggsave(here("figures", "brazil_baseline_weekly_deaths_by_state.pdf"),
+ggsave("figures/brazil_baseline_weekly_deaths_by_state.pdf",
        width = 10,
        height = 50,
        limitsize = FALSE)
+
+# ====
+
+
+# mortality excess ====
+# ~~~~~~~~~~~~~~~~~~~~~
+bra_exc <- 
+  bra_bsn %>% 
+  filter(year >= 2020) %>% 
+  select(state, state_iso, date, dts, bsn, exposure) %>% 
+  mutate(excess = dts - bsn,
+         pscore = dts / bsn)
+
+write.csv(bra_exc, "data_inter/brazil_weekly_excess_2020_2021.csv")
+

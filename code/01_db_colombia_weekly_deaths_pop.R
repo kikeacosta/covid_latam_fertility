@@ -1,16 +1,16 @@
 source("Code/00_functions.R")
 
-col <- read_xlsx("data/colombia/anexos-defunciones-covid-dept-semana-35-2021.xlsx",
+col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-35-2021.xlsx",
                  sheet = 2,
                  skip = 11,
                  col_types = rep("text", 15))
 
 pop_05_17 <- 
-  read_xlsx("data/colombia/anexo-area-sexo-edad-proyecciones-poblacion-departamental_2005-2017.xlsx",
+  read_xlsx("data_input/colombia/anexo-area-sexo-edad-proyecciones-poblacion-departamental_2005-2017.xlsx",
             skip = 11)
 
 pop_18_50 <- 
-  read_xlsx("data/colombia/anexo-proyecciones-poblacion-departamental_2018-2050.xlsx",
+  read_xlsx("data_input/colombia/anexo-proyecciones-poblacion-departamental_2018-2050.xlsx",
             skip = 11)
 
 
@@ -182,4 +182,4 @@ col_dts_pop <-
   col4 %>% 
   left_join(pop_interpol3)
 
-write_rds(col_dts_pop, "output/colombia_deaths_population_2015_2021.rds")
+write_rds(col_dts_pop, "data_inter/colombia_deaths_population_2015_2021.rds")
