@@ -20,6 +20,7 @@ cts <- c("Colombia", "Brazil", "Argentina", "Mexico", "Peru")
 dat <-  read_csv("data/InputDB.zip",
                  skip = 1) %>% 
   filter(Country %in% cts) 
+
   
 # Seleccionando variables de interes
 # incluyendo algunas ciudades en Colombia
@@ -84,5 +85,5 @@ test <-
   mutate(ok_cases = ifelse(Tot_Cases == Cases, "y", "n"),
          ok_deaths = ifelse(Tot_Deaths == Deaths, "y", "n"))
 
-write_csv(dat4, "output/covid_casos_muertes_latam_regional_cuatrimestre.csv")
-write_csv(iso_codes, "output/codigos_iso_regiones.csv")
+write_csv(dat4, "data_inter/covid_casos_muertes_latam_regional_cuatrimestre.csv")
+write_csv(iso_codes, "data_inter/codigos_iso_regiones.csv")
