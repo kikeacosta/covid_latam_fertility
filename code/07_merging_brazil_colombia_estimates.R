@@ -85,7 +85,8 @@ all <-
   bind_rows(col_bsn2,
             bra_bsn2) %>% 
   filter(date >= "2020-01-01") %>% 
-  left_join(week_conf)
+  left_join(week_conf) %>% 
+  mutate(dts_excs = dts - bsn)
 
 
 write_rds(all, "data_inter/weekly_excess_confirmed_brazil_colombia.rds")
