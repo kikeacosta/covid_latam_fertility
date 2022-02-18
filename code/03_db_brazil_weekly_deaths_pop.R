@@ -17,50 +17,50 @@
   # loading deaths from microdata ====
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
-  # csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
-  # out <- list()
-  # for (i in csv_files){
-  #   cat(i)
-  #   out[[i]] <- 
-  #     read_delim(i,
-  #                delim = ";",
-  #                col_types = cols(.default = "c")) %>%
-  #     filter(TIPOBITO == "2") %>%
-  #     select(date = DTOBITO, mun_code = CODMUNOCOR) %>%
-  #     mutate(date = dmy(date),
-  #            isoweek = date2ISOweek(date),
-  #            year = str_sub(isoweek, 1, 4) %>% as.double(),
-  #            week = str_sub(isoweek, 7, 8) %>% as.double(),
-  #            state_num = str_sub(mun_code, 1, 2)) %>%
-  #     group_by(year, week, state_num) %>%
-  #     summarise(dts = n()) %>%
-  #     ungroup()
-  # }
-  # 
-  # dts <-
-  #   out %>%
-  #   bind_rows() %>%
-  #   mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
-  #          date = ISOweek2date(isoweek),
-  #          state_num = state_num %>% as.double()) %>% 
-  #   filter(year >= 2015) %>% 
-  #   left_join(reg_codes) %>% 
-  #   select(-isoweek, -region, -state_num) %>% 
-  #   rename(state = state_name)
-  # 
-  # dts_nal <- 
-  #   dts %>% 
-  #   group_by(year, week, date) %>% 
-  #   summarise(dts = sum(dts)) %>% 
-  #   ungroup() %>% 
-  #   mutate(state = "Total",
-  #          state_iso = "BR") %>% 
-  #   bind_rows(dts) %>% 
-  #   arrange(state, date)
-  
-  
-  # # saving daily deaths by state
-  # write_rds(dts_nal, "data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
+  csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
+  out <- list()
+  for (i in csv_files){
+    cat(i)
+    out[[i]] <-
+      read_delim(i,
+                 delim = ";",
+                 col_types = cols(.default = "c")) %>%
+      filter(TIPOBITO == "2") %>%
+      select(date = DTOBITO, mun_code = CODMUNOCOR) %>%
+      mutate(date = dmy(date),
+             isoweek = date2ISOweek(date),
+             year = str_sub(isoweek, 1, 4) %>% as.double(),
+             week = str_sub(isoweek, 7, 8) %>% as.double(),
+             state_num = str_sub(mun_code, 1, 2)) %>%
+      group_by(year, week, state_num) %>%
+      summarise(dts = n()) %>%
+      ungroup()
+  }
+
+  dts <-
+    out %>%
+    bind_rows() %>%
+    mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
+           date = ISOweek2date(isoweek),
+           state_num = state_num %>% as.double()) %>%
+    filter(year >= 2015) %>%
+    left_join(reg_codes) %>%
+    select(-isoweek, -region, -state_num) %>%
+    rename(state = state_name)
+
+  dts_nal <-
+    dts %>%
+    group_by(year, week, date) %>%
+    summarise(dts = sum(dts)) %>%
+    ungroup() %>%
+    mutate(state = "Total",
+           state_iso = "BR") %>%
+    bind_rows(dts) %>%
+    arrange(state, date)
+
+
+  # saving daily deaths by state
+  write_rds(dts_nal, "data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
   
   # ====
   
