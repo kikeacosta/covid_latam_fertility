@@ -12,11 +12,20 @@
   
   # States and municipality codes
   reg_codes <- 
-    read_csv("data_input/brazil/bra_state_codes_names.csv")
+    read_csv("data_input/brazil/bra_state_codes_names.csv", 
+             locale = readr::locale(encoding = "latin1"))
   
   # loading deaths from microdata ====
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
+  # deaths 2021
+  # source: http://svs.aids.gov.br/dantps/centrais-de-conteudos/dados-abertos/sim/
+  # # converting 2021 from dbf to csv
+  # library(foreign)
+  # d21 <- read.dbf("data_input/brazil/DO21OPEN.dbf")
+  # write_delim(d21, "data_input/brazil/Mortalidade_Geral_2021.csv",
+  #             delim = ";")
+
   csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
   out <- list()
   for (i in csv_files){
@@ -64,11 +73,11 @@
   
   # ====
   
-  
-  # loading daily deaths by state ====
-  # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  dts_nal <- read_rds("data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
 }
+
+# loading daily deaths by state ====
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+dts_nal <- read_rds("data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
 
 # reading population by state
 pop <- 

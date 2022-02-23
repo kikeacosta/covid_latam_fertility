@@ -5,12 +5,12 @@ library(ggridges)
 
 db <- read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
 
-
-db %>%
-  group_by(country, div) %>%
-  mutate(date_peak = date[which.max(dts_excs)] %>% as.numeric()) %>%
-  ungroup() %>%
-  ggplot(mapping = aes(x = date,
+tx <- 8
+db %>% 
+  group_by(country, div) %>% 
+  mutate(date_peak = date[which.max(dts_excs)] %>% as.numeric()) %>% 
+  ungroup() %>% 
+  ggplot(mapping = aes(x = date, 
                        y = div,
                        height = dts_excs,
                        group = div)) +
@@ -34,6 +34,7 @@ db2 <-
          dts_mth_lag = dts * (1 - frc),
          bsn_mth_i = bsn * frc,
          bsn_mth_lag = bsn * (1 - frc))
+
 dts <- 
   db2 %>%
   select(country, div, ini_month, dts_mth_i, dts_mth_lag) %>% 
@@ -52,6 +53,15 @@ bsn <-
                           TRUE ~ ini_month - months(1))) %>% 
   group_by(country, div, date) %>% 
   summarise(bsn = sum(bsn)) %>% 
+  ungroup()
+
+pop <- 
+  db %>% 
+  filter(month(date) == 6) %>% 
+  mutate(year = year(date)) %>% 
+  select(country, div, year, exposure) %>% 
+  group_by(country, div, year) %>% 
+  summarise(pop = mean(exposure) * 52) %>% 
   ungroup()
 
 db3 <- 
@@ -93,7 +103,7 @@ cols <-
 tx <- 8
 
 db4 %>% 
-  filter(date <= "2021-04-01") %>% 
+  filter(date <= "2021-10-01") %>% 
   ggplot(aes(date, pscore)) +
   geom_boxplot(aes(group = date), outlier.shape = NA)+
   geom_jitter(aes(date, pscore, col = col_div, alpha = ident, size = ident),
@@ -144,25 +154,29 @@ trims <- seq(ymd('2020-01-01'),ymd('2021-12-31'), by = '3 months')
 
 db5 <- 
   dts %>% 
+  mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
-  filter(date >= "2020-01-01" & date < "2021-04-01") %>%
+  left_join(pop) %>% 
+  filter(date >= "2020-01-01" & date < "2021-08-30") %>%
   mutate(trim_n = quarter(date),
-         year = year(date),
          trimstr = case_when(year == 2020 & trim_n == 1 ~ "Jan-Mar\n2020",
                              year == 2020 & trim_n == 2 ~ "Apr-Jun\n2020",
                              year == 2020 & trim_n == 3 ~ "Jul-Sep\n2020",
                              year == 2020 & trim_n == 4 ~ "Oct-Dec\n2020",
                              year == 2021 & trim_n == 1 ~ "Jan-Mar\n2021",
-                             year == 2021 & trim_n == 2 ~ "Apr-Jun\n2021"),
+                             year == 2021 & trim_n == 2 ~ "Apr-Jun\n2021",
+                             year == 2021 & trim_n == 3 ~ "Jul-Aug\n2021"),
          trimstr = factor(trimstr, levels = c("Jan-Mar\n2020",
                                               "Apr-Jun\n2020",
                                               "Jul-Sep\n2020",
                                               "Oct-Dec\n2020",
                                               "Jan-Mar\n2021",
-                                              "Apr-Jun\n2021"))) %>% 
+                                              "Apr-Jun\n2021",
+                                              "Jul-Aug\n2021"))) %>% 
   group_by(country, div, year, trimstr) %>% 
   summarise(dts = sum(dts),
-            bsn = sum(bsn)) %>% 
+            bsn = sum(bsn),
+            pop = mean(pop)) %>% 
   ungroup() %>% 
   mutate(pscore = dts / bsn)
 
@@ -175,7 +189,6 @@ divs_labs <-
   filter((country == "Colombia" & ord %in% c(1, 2, 33, 34))|
            (country == "Brazil" & ord %in% c(1, 2, 27, 28))) %>% 
   select(country, div, trimstr, pscore, ord)
-
 
 db6 <- 
   db5 %>% 
@@ -199,7 +212,7 @@ db6 %>%
                   col = col_div, 
                   # shape = ident,
                   alpha = ident, 
-                  size = ident),
+                  size = pop),
               width = 0.05, height = 0)+
   geom_text_repel(data = divs_labs, aes(trimstr, pscore, label = div),
             size = tx / 3, 
@@ -208,31 +221,34 @@ db6 %>%
             box.padding = 0.1,
             direction = "y",
             # nudge_x = 0.1,
-            hjust = -0.1)+
+            hjust = -0.3)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
   # scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-09-01'), by = '1 months'),
   #              minor_breaks = NULL,
   #              date_labels = "%b\n%Y")+
-  scale_color_manual(values = cols, guide = "none")+
+  scale_color_manual(values = cols)+
   scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
   # scale_shape_manual(values = c(16, 1), guide = "none")+
-  scale_size_manual(values = c(2, 1.5), guide = "none")+
+  # scale_size_manual(values = c(2, 1.5), guide = "none")+
+  # guides(color = guide_legend(nrow = 3))+
   facet_wrap(~ country)+
   geom_hline(yintercept = 1, linetype = "dashed")+
-  labs(y = "Excess p-score", x = "Date",
-       col = "Subnational\ndivision")+
+  labs(y = "Excess p-score", 
+       x = "Trimester",
+       col = "Excess",
+       size = "Population")+
   theme_bw()+
-  theme(legend.position = "none",
+  theme(legend.position = "bottom",
         axis.text = element_text(size = tx + 2),
         axis.title = element_text(size = tx + 3), 
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4)) +
-  guides(color = guide_legend(nrow = 2, byrow = TRUE,
-                              override.aes = list(size = 2.5)))
+  guides(color = guide_legend(nrow = 1, byrow = TRUE,
+                              override.aes = list(size = 3)))
 
 ggsave("figures/pscores_boxplot_trim.pdf", 
        dpi = 600,
-       w = 18,
+       w = 20,
        h = 8)
 
