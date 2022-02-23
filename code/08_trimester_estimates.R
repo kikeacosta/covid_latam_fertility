@@ -6,16 +6,16 @@ library(ggridges)
 db <- read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
 
 
-db %>% 
-  group_by(country, div) %>% 
-  mutate(date_peak = date[which.max(dts_excs)] %>% as.numeric()) %>% 
-  ungroup() %>% 
-  ggplot(mapping = aes(x = date, 
+db %>%
+  group_by(country, div) %>%
+  mutate(date_peak = date[which.max(dts_excs)] %>% as.numeric()) %>%
+  ungroup() %>%
+  ggplot(mapping = aes(x = date,
                        y = div,
                        height = dts_excs,
-                       group = div)) + 
+                       group = div)) +
   geom_ridgeline(mapping = aes(y = reorder(div, -date_peak),
-                               fill = as.factor(country)), alpha = .4) + 
+                               fill = as.factor(country)), alpha = .4) +
   facet_wrap(~ country, ncol = 1, scales = "free_y") +
   scale_fill_manual(values = c("#2a9d8f", "#e76f51")) +
   theme_bw()+
@@ -24,9 +24,6 @@ db %>%
         axis.title.y = element_text(size = tx - 1),
         legend.position = "none",
         strip.background = element_rect(fill = "transparent"))
-
-
-
 
 db2 <- 
   db %>% 
