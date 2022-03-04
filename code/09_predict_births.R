@@ -4,7 +4,7 @@ library(mgcv)
 db <- 
   read_rds("data_inter/db_trimester_bra_col.RDS") %>% 
   as_tibble()
-
+typeof(db)
 db2 <- 
   db %>% 
   mutate(ctr_reg = paste(ISO_Code, Region, sep = "-")) %>% 
@@ -103,7 +103,7 @@ options(tibble.width = Inf)
 db_out <- 
   db %>% 
   left_join(out)
-  
+
 write_rds(db_out, "data_inter/db_trimester_bra_col_ea.RDS")
 
   
