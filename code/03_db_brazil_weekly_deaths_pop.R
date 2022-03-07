@@ -21,10 +21,10 @@
   # deaths 2021
   # source: http://svs.aids.gov.br/dantps/centrais-de-conteudos/dados-abertos/sim/
   # # converting 2021 from dbf to csv
-  library(foreign)
-  d21 <- read.dbf("data_input/brazil/DO21OPEN.dbf")
-  write_delim(d21, "data_input/brazil/Mortalidade_Geral_2021.csv",
-              delim = ";")
+  # library(foreign)
+  # d21 <- read.dbf("data_input/brazil/DO21OPEN.dbf")
+  # write_delim(d21, "data_input/brazil/Mortalidade_Geral_2021.csv",
+  #             delim = ";")
 
   csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
   out <- list()
@@ -38,17 +38,20 @@
       select(date = DTOBITO, mun_code = CODMUNOCOR) %>%
       mutate(date = dmy(date),
              isoweek = date2ISOweek(date),
-             year = str_sub(isoweek, 1, 4) %>% as.double(),
-             week = str_sub(isoweek, 7, 8) %>% as.double(),
              state_num = str_sub(mun_code, 1, 2)) %>%
-      group_by(year, week, state_num) %>%
+      group_by(isoweek, state_num) %>%
       summarise(dts = n()) %>%
-      ungroup()
+      ungroup() %>% 
+      mutate(year = str_sub(isoweek, 1, 4) %>% as.double(),
+             week = str_sub(isoweek, 7, 8) %>% as.double()) 
   }
 
   dts <-
     out %>%
     bind_rows() %>%
+    group_by(year, week, state_num) %>%
+    summarise(dts = sum(dts)) %>%
+    ungroup() %>% 
     mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
            date = ISOweek2date(isoweek),
            state_num = state_num %>% as.double()) %>%
