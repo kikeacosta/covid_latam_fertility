@@ -21,10 +21,10 @@
   # deaths 2021
   # source: http://svs.aids.gov.br/dantps/centrais-de-conteudos/dados-abertos/sim/
   # # converting 2021 from dbf to csv
-  # library(foreign)
-  # d21 <- read.dbf("data_input/brazil/DO21OPEN.dbf")
-  # write_delim(d21, "data_input/brazil/Mortalidade_Geral_2021.csv",
-  #             delim = ";")
+  library(foreign)
+  d21 <- read.dbf("data_input/DO21OPEN.dbf")
+  write_delim(d21, "data_input/brazil/Mortalidade_Geral_2021.csv",
+              delim = ";")
 
   csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
   out <- list()
