@@ -237,7 +237,7 @@ db6 %>%
   geom_hline(yintercept = 1, linetype = "dashed")+
   labs(y = "Excess p-score", 
        x = "Trimester",
-       col = "Excess",
+       col = "Extreme values",
        size = "Population")+
   theme_bw()+
   theme(legend.position = "bottom",
