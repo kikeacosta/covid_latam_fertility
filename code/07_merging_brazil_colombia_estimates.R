@@ -67,7 +67,7 @@ col_bsn2 <-
                       "Total" = "Total",
                       "Valle del Cauca" = "Valle",
                       "Vaupés" = "Vaupes")) %>% 
-  select(country, div, date, isoweek, dts, bsn, exposure)
+  select(country, div, date, isoweek, dts, bsn, ll, ul, exposure)
 
 # excess estimates from Brazil
 bra_bsn <- read_rds("data_inter/brazil_baseline_weekly_2015_2021.rds")
@@ -79,7 +79,7 @@ bra_bsn2 <-
          isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
          div = str_trim(div),
          country = "Brazil") %>% 
-  select(country, div, date, isoweek, dts, bsn, exposure) 
+  select(country, div, date, isoweek, dts, bsn, ll, ul, exposure) 
 
 all <- 
   bind_rows(col_bsn2,

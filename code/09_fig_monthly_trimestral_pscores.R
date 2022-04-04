@@ -5,6 +5,7 @@ library(ggridges)
 
 db <- read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
 
+# from weekly to monthly deaths 
 db2 <- 
   db %>% 
   mutate(ini_month = make_date(d  = 1, m = month(date), y = year(date)),
@@ -131,18 +132,20 @@ db4 %>%
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4))
 
-ggsave("figures/pscores_boxplot.png", 
-       dpi = 600,
-       w = 12,
-       h = 8)
-
-ggsave("figures/pscores_boxplot.pdf", 
-       w = 12,
-       h = 8)
-
+# ggsave("figures/pscores_boxplot.png", 
+#        dpi = 600,
+#        w = 12,
+#        h = 8)
+# 
+# ggsave("figures/pscores_boxplot.pdf", 
+#        w = 12,
+#        h = 8)
+# 
 
 # data in trimesters ====
 # ~~~~~~~~~~~~~~~~~~~~~~~
+# reading cumulative pscores
+cum_pscores <- read_rds("data_inter/trimestral_cumulative_pscores.rds")
 
 trims <- seq(ymd('2020-01-01'),ymd('2021-12-31'), by = '3 months')
 
@@ -173,7 +176,8 @@ db5 <-
             bsn = sum(bsn),
             pop = mean(pop)) %>% 
   ungroup() %>% 
-  mutate(pscore = dts / bsn)
+  mutate(pscore = dts / bsn) %>%
+  left_join(cum_pscores)
 
 divs_labs <- 
   db5 %>% 
@@ -185,15 +189,28 @@ divs_labs <-
            (country == "Brazil" & ord %in% c(1, 2, 26, 27))) %>% 
   select(country, div, trimstr, pscore, ord)
 
+divs_labs_cum <- 
+  db5 %>% 
+  group_by(country, trimstr) %>% 
+  arrange(-cum_pscore) %>% 
+  mutate(ord2 = 1:n()) %>% 
+  ungroup() %>% 
+  filter((country == "Colombia" & ord2 %in% c(1, 2, 32, 33))|
+           (country == "Brazil" & ord2 %in% c(1, 2, 26, 27))) %>% 
+  select(country, div, trimstr, cum_pscore, ord2)
+
+
+
 db6 <- 
   db5 %>% 
   left_join(divs_labs) %>% 
+  left_join(divs_labs_cum) %>% 
   mutate(col_div = case_when(ord <= 2 ~ "Highest p-score",
                              ord > 2 ~ "Lowest p-score",
                              TRUE ~ "other"),
          col_div = factor(col_div, 
                           levels = c("Lowest p-score", "Highest p-score", "other")),
-         ident = ifelse(col_div == "other", "other", "ident"))
+         ident = ifelse(col_div == "other", "other", "ident")) 
 
 cols <- 
   c("Highest p-score" = "#bb3e03",
@@ -244,20 +261,74 @@ db6 %>%
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4)) 
 
-ggsave("figures/pscores_boxplot_trim.pdf", 
+ggsave("figures/pscores_boxplot_trim.pdf",
        dpi = 600,
        w = 20,
        h = 8)
 
-ggsave("figures/pscores_boxplot_trim.png", 
+ggsave("figures/pscores_boxplot_trim.png",
        dpi = 600,
        w = 20,
        h = 8)
 
-trim_out <- 
-  db6 %>% 
-  select(-ord, -col_div, -ident)
+
+trim_out <-
+  db6 %>%
+  select(-ord, -ord2, -col_div, -ident)
+
 
 write_rds(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.rds")
 write_csv(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.csv")
+
+db6 %>% 
+  ggplot(aes(trimstr, cum_pscore)) +
+  geom_boxplot(aes(group = trimstr), outlier.shape = NA)+
+  geom_jitter(aes(trimstr, cum_pscore, 
+                  col = col_div, 
+                  # shape = ident,
+                  alpha = ident, 
+                  size = pop),
+              width = 0.025, height = 0)+
+  geom_text_repel(data = divs_labs_cum, aes(trimstr, cum_pscore, label = div),
+                  size = tx / 3, 
+                  show.legend = FALSE,
+                  force = 0.1, 
+                  box.padding = 0.1,
+                  direction = "y",
+                  # nudge_x = 0.1,
+                  hjust = -0.15)+
+  scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
+                breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
+  scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
+  scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+                        labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
+  guides(color = guide_legend(order = 1,
+                              nrow = 1, byrow = TRUE,
+                              override.aes = list(size = 3)),
+         size = guide_legend(nrow = 1))+
+  facet_wrap(~ country)+
+  geom_hline(yintercept = 1, linetype = "dashed")+
+  labs(y = "Cumulative p-score", 
+       x = "Trimester",
+       col = "Extreme values",
+       size = "Population")+
+  theme_bw()+
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = tx + 3),
+        legend.text = element_text(size = tx + 2),
+        axis.text = element_text(size = tx + 2),
+        axis.title = element_text(size = tx + 3), 
+        strip.background = element_rect(fill = "transparent"),
+        strip.text = element_text(size = tx + 4)) 
+
+ggsave("figures/cum_pscores_boxplot_trim.pdf",
+       dpi = 600,
+       w = 20,
+       h = 8)
+
+ggsave("figures/cum_pscores_boxplot_trim.png",
+       dpi = 600,
+       w = 20,
+       h = 8)
 
