@@ -200,7 +200,6 @@ divs_labs_cum <-
   select(country, div, trimstr, cum_pscore, ord2)
 
 
-
 db6 <- 
   db5 %>% 
   left_join(divs_labs) %>% 
@@ -210,7 +209,13 @@ db6 <-
                              TRUE ~ "other"),
          col_div = factor(col_div, 
                           levels = c("Lowest p-score", "Highest p-score", "other")),
-         ident = ifelse(col_div == "other", "other", "ident")) 
+         ident = ifelse(col_div == "other", "other", "ident"),
+         col_div2 = case_when(ord2 <= 2 ~ "Highest p-score",
+                             ord2 > 2 ~ "Lowest p-score",
+                             TRUE ~ "other"),
+         col_div2 = factor(col_div2, 
+                          levels = c("Lowest p-score", "Highest p-score", "other")),
+         ident2 = ifelse(col_div2 == "other", "other", "ident")) 
 
 cols <- 
   c("Highest p-score" = "#bb3e03",
@@ -284,9 +289,9 @@ db6 %>%
   ggplot(aes(trimstr, cum_pscore)) +
   geom_boxplot(aes(group = trimstr), outlier.shape = NA)+
   geom_jitter(aes(trimstr, cum_pscore, 
-                  col = col_div, 
+                  col = col_div2, 
                   # shape = ident,
-                  alpha = ident, 
+                  alpha = ident2, 
                   size = pop),
               width = 0.025, height = 0)+
   geom_text_repel(data = divs_labs_cum, aes(trimstr, cum_pscore, label = div),
