@@ -147,6 +147,8 @@ db4 %>%
 # reading cumulative pscores
 cum_pscores <- read_rds("data_inter/trimestral_cumulative_pscores.rds")
 
+
+# grouping into trimesters
 trims <- seq(ymd('2020-01-01'),ymd('2021-12-31'), by = '3 months')
 
 db5 <- 
@@ -199,7 +201,6 @@ divs_labs_cum <-
            (country == "Brazil" & ord2 %in% c(1, 2, 26, 27))) %>% 
   select(country, div, trimstr, cum_pscore, ord2)
 
-
 db6 <- 
   db5 %>% 
   left_join(divs_labs) %>% 
@@ -217,6 +218,23 @@ db6 <-
                           levels = c("Lowest p-score", "Highest p-score", "other")),
          ident2 = ifelse(col_div2 == "other", "other", "ident")) 
 
+
+
+# saving trimestral estimates
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+trim_out <-
+  db6 %>%
+  select(-ord, -ord2, -col_div, -ident, -col_div2, -ident2)
+
+write_rds(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.rds")
+write_csv(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.csv")
+
+
+
+# plotting pscores ====
+# ~~~~~~~~~~~~~~~~~~~~~
+
 cols <- 
   c("Highest p-score" = "#bb3e03",
     "Lowest p-score" = "#0a9396",
@@ -224,6 +242,8 @@ cols <-
 
 tx <- 10
 
+# trimestral pscores
+# ~~~~~~~~~~~~~~~~~~
 db6 %>% 
   ggplot(aes(trimstr, pscore)) +
   geom_boxplot(aes(group = trimstr), outlier.shape = NA)+
@@ -277,14 +297,8 @@ ggsave("figures/pscores_boxplot_trim.png",
        h = 8)
 
 
-trim_out <-
-  db6 %>%
-  select(-ord, -ord2, -col_div, -ident)
-
-
-write_rds(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.rds")
-write_csv(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.csv")
-
+# cumulative trimestral pscores
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 db6 %>% 
   ggplot(aes(trimstr, cum_pscore)) +
   geom_boxplot(aes(group = trimstr), outlier.shape = NA)+
