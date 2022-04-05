@@ -3,32 +3,73 @@ source("Code/00_functions.R")
 db <- 
   read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
 
+# from weekly to monthly deaths 
 db2 <- 
   db %>% 
-  mutate(dts_exc_pos = ifelse(dts_excs > 0, dts_excs, 0),
-         dts_conf = ifelse(is.na(dts_conf), 0, dts_conf),
-         css_conf = ifelse(is.na(css_conf), 0, css_conf),
-         out_lls = ifelse(dts < ll | dts > ul, 1, 0), 
-         dts_exc_adj = ifelse(dts > ll, dts_excs, ll)) %>% 
-  group_by(country, div) %>% 
-  mutate(cum_bsn = cumsum(bsn),
-         cum_dts_conf = cumsum(dts_conf),
-         cum_dts_exc = cumsum(dts_exc_adj),
-         cum_dts_exc_pos = cumsum(dts_exc_pos)) %>% 
-  ungroup() %>% 
-  mutate(cum_pscore = (cum_bsn + cum_dts_exc_pos) / cum_bsn,
-         cum_pscore2 = (cum_bsn + cum_dts_exc) / cum_bsn)
+  mutate(ini_month = make_date(d  = 1, m = month(date), y = year(date)),
+         days_in_mth = as.numeric(date - ini_month) + 1,
+         frc = ifelse(days_in_mth >= 7, 1, days_in_mth/7),
+         dts_mth_i = dts * frc,
+         dts_mth_lag = dts * (1 - frc),
+         bsn_mth_i = bsn * frc,
+         bsn_mth_lag = bsn * (1 - frc))
 
-  
-db2 %>% 
-  ggplot()+
-  geom_point(aes(div, cum_pscore2, col = date))+
-  geom_hline(yintercept = 1, linetype = "dashed")+
-  scale_y_log10()+
-  theme_bw()
+dts <- 
+  db2 %>%
+  select(country, div, ini_month, dts_mth_i, dts_mth_lag) %>% 
+  gather(dts_mth_i, dts_mth_lag, key = per, value = dts) %>% 
+  mutate(date = case_when(per == "dts_mth_i" ~ ini_month,
+                          TRUE ~ ini_month - months(1))) %>% 
+  group_by(country, div, date) %>% 
+  summarise(dts = sum(dts)) %>% 
+  ungroup()
+
+bsn <- 
+  db2 %>% 
+  select(country, div, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
+  gather(bsn_mth_i, bsn_mth_lag, key = per, value = bsn) %>% 
+  mutate(date = case_when(per == "bsn_mth_i" ~ ini_month,
+                          TRUE ~ ini_month - months(1))) %>% 
+  group_by(country, div, date) %>% 
+  summarise(bsn = sum(bsn)) %>% 
+  ungroup()
 
 db3 <- 
-  db2 %>% 
+  dts %>% 
+  mutate(year = year(date)) %>% 
+  left_join(bsn) %>% 
+  filter(date >= "2020-01-01" & date <= "2021-09-30",
+         div != "Total") %>% 
+  mutate(pscore = dts / bsn)
+
+db4 <- 
+  db3 %>% 
+  mutate(dts_exc_pos = ifelse(dts > bsn, dts - bsn, 0)) %>% 
+  group_by(country, div) %>% 
+  mutate(cum_bsn = cumsum(bsn),
+         cum_dts_exc_pos = cumsum(dts_exc_pos),
+         cum_avg_pscore = cumsum(pscore) / seq_along(pscore)) %>% 
+  ungroup() %>% 
+  mutate(cum_pscore = (cum_bsn + cum_dts_exc_pos) / cum_bsn)
+
+db4 %>% 
+  mutate(country_div = paste0(country, "_", div)) %>% 
+  ggplot()+
+  geom_point(aes(cum_pscore, country_div, col = date))+
+  geom_vline(xintercept = 1, linetype = "dashed")+
+  scale_x_log10()+
+  theme_bw()
+
+db4 %>% 
+  mutate(country_div = paste0(country, "_", div)) %>% 
+  ggplot()+
+  geom_point(aes(cum_avg_pscore, country_div, col = date))+
+  geom_vline(xintercept = 1, linetype = "dashed")+
+  scale_x_log10()+
+  theme_bw()
+
+db5 <- 
+  db4 %>% 
   mutate(trim_n = quarter(date),
          year = year(date),
          trimstr = case_when(year == 2020 & trim_n == 1 ~ "Jan-Mar\n2020",
@@ -46,7 +87,8 @@ db3 <-
                                               "Apr-Jun\n2021",
                                               "Jul-Aug\n2021"))) %>% 
   group_by(country, div, year, trimstr) %>% 
-  summarise(cum_pscore = mean(cum_pscore)) %>% 
+  summarise(cum_pscore = mean(cum_pscore),
+            cum_avg_pscore = mean(cum_avg_pscore)) %>% 
   ungroup() 
 
-write_rds(db3, "data_inter/trimestral_cumulative_pscores.rds")
+write_rds(db5, "data_inter/trimestral_cumulative_pscores.rds")

@@ -201,10 +201,21 @@ divs_labs_cum <-
            (country == "Brazil" & ord2 %in% c(1, 2, 26, 27))) %>% 
   select(country, div, trimstr, cum_pscore, ord2)
 
+divs_labs_avg <- 
+  db5 %>% 
+  group_by(country, trimstr) %>% 
+  arrange(-cum_avg_pscore) %>% 
+  mutate(ord3 = 1:n()) %>% 
+  ungroup() %>% 
+  filter((country == "Colombia" & ord3 %in% c(1, 2, 32, 33))|
+           (country == "Brazil" & ord3 %in% c(1, 2, 26, 27))) %>% 
+  select(country, div, trimstr, cum_avg_pscore, ord3)
+
 db6 <- 
   db5 %>% 
   left_join(divs_labs) %>% 
   left_join(divs_labs_cum) %>% 
+  left_join(divs_labs_avg) %>% 
   mutate(col_div = case_when(ord <= 2 ~ "Highest p-score",
                              ord > 2 ~ "Lowest p-score",
                              TRUE ~ "other"),
@@ -212,11 +223,17 @@ db6 <-
                           levels = c("Lowest p-score", "Highest p-score", "other")),
          ident = ifelse(col_div == "other", "other", "ident"),
          col_div2 = case_when(ord2 <= 2 ~ "Highest p-score",
-                             ord2 > 2 ~ "Lowest p-score",
-                             TRUE ~ "other"),
+                              ord2 > 2 ~ "Lowest p-score",
+                              TRUE ~ "other"),
          col_div2 = factor(col_div2, 
-                          levels = c("Lowest p-score", "Highest p-score", "other")),
-         ident2 = ifelse(col_div2 == "other", "other", "ident")) 
+                           levels = c("Lowest p-score", "Highest p-score", "other")),
+         ident2 = ifelse(col_div2 == "other", "other", "ident"),
+         col_div3 = case_when(ord3 <= 2 ~ "Highest p-score",
+                              ord3 > 2 ~ "Lowest p-score",
+                              TRUE ~ "other"),
+         col_div3 = factor(col_div3, 
+                           levels = c("Lowest p-score", "Highest p-score", "other")),
+         ident3 = ifelse(col_div3 == "other", "other", "ident")) 
 
 
 
@@ -225,7 +242,7 @@ db6 <-
 
 trim_out <-
   db6 %>%
-  select(-ord, -ord2, -col_div, -ident, -col_div2, -ident2)
+  select(-ord, -col_div, -ident, -ord2, -col_div2, -ident2, -ord3, -col_div3, -ident3)
 
 write_rds(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.rds")
 write_csv(trim_out, "data_inter/trimestral_excess_confirmed_brazil_colombia.csv")
@@ -347,6 +364,61 @@ ggsave("figures/cum_pscores_boxplot_trim.pdf",
        h = 8)
 
 ggsave("figures/cum_pscores_boxplot_trim.png",
+       dpi = 600,
+       w = 20,
+       h = 8)
+
+
+# cumulative average pscores
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+db6 %>% 
+  ggplot(aes(trimstr, cum_avg_pscore)) +
+  geom_boxplot(aes(group = trimstr), outlier.shape = NA)+
+  geom_jitter(aes(trimstr, cum_avg_pscore, 
+                  col = col_div3, 
+                  # shape = ident,
+                  alpha = ident3, 
+                  size = pop),
+              width = 0.025, height = 0)+
+  geom_text_repel(data = divs_labs_avg, aes(trimstr, cum_avg_pscore, label = div),
+                  size = tx / 3, 
+                  show.legend = FALSE,
+                  force = 0.1, 
+                  box.padding = 0.1,
+                  direction = "y",
+                  # nudge_x = 0.1,
+                  hjust = -0.15)+
+  scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
+                breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
+  scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
+  scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+                        labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
+  guides(color = guide_legend(order = 1,
+                              nrow = 1, byrow = TRUE,
+                              override.aes = list(size = 3)),
+         size = guide_legend(nrow = 1))+
+  facet_wrap(~ country)+
+  geom_hline(yintercept = 1, linetype = "dashed")+
+  labs(y = "Average p-score", 
+       x = "Trimester",
+       col = "Extreme values",
+       size = "Population")+
+  theme_bw()+
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = tx + 3),
+        legend.text = element_text(size = tx + 2),
+        axis.text = element_text(size = tx + 2),
+        axis.title = element_text(size = tx + 3), 
+        strip.background = element_rect(fill = "transparent"),
+        strip.text = element_text(size = tx + 4)) 
+
+ggsave("figures/avg_pscores_boxplot_trim.pdf",
+       dpi = 600,
+       w = 20,
+       h = 8)
+
+ggsave("figures/avg_pscores_boxplot_trim.png",
        dpi = 600,
        w = 20,
        h = 8)
