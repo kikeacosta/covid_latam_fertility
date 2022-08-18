@@ -28,7 +28,3 @@ bra_bsn2 <-
             bra_bsn)
 
 
-
-dpto      isoweek
-
-state state_iso  
