@@ -18,7 +18,8 @@ bra_dts_pop2 <-
 bra_bsn <- 
   bra_dts_pop2 %>% 
   group_by(state) %>% 
-  do(est_baseline(db = .data))
+  do(est_baseline(db = .data)) %>% 
+  ungroup()
 
 write_rds(bra_bsn, "data_inter/brazil_baseline_weekly_2015_2021.rds")
 
