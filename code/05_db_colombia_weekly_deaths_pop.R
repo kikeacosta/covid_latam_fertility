@@ -1,6 +1,6 @@
 source("Code/00_functions.R")
 
-col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-35-2021.xlsx",
+col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-22-2022.xlsx",
                  sheet = 2,
                  skip = 11,
                  col_types = rep("text", 15))
@@ -54,13 +54,15 @@ unique(col2$week)
 col_sum <- 
   col2 %>% 
   group_by(dpto, year) %>% 
-  summarise(dts = sum(dts))
+  summarise(dts = sum(dts)) %>% 
+  ungroup()
 
 chunk <- 
   col2 %>% 
   filter(year == 2015,
          week == 1)
 
+# re-scaling regions
 dist_unk_dpto <- 
   function(chunk){
     tot <- 
@@ -102,7 +104,7 @@ col4 %>%
   ggplot()+
   geom_line(aes(date, dts))
 
-
+unique(col4$dpto) %>% sort
 
 # population
 # ~~~~~~~~~~
@@ -142,6 +144,8 @@ pop_all <-
   summarise(pop = sum(pop)) %>% 
   ungroup() %>% 
   mutate(week = 26)
+
+dptos <- unique(pop$dpto) %>% sort
 
 pop_interpol <- 
   expand_grid(year = 2014:2022, week = 1:52, dpto = dptos) %>% 

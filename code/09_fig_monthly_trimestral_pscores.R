@@ -18,21 +18,21 @@ db2 <-
 
 dts <- 
   db2 %>%
-  select(country, div, ini_month, dts_mth_i, dts_mth_lag) %>% 
+  select(country, div, code, ini_month, dts_mth_i, dts_mth_lag) %>% 
   gather(dts_mth_i, dts_mth_lag, key = per, value = dts) %>% 
   mutate(date = case_when(per == "dts_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, date) %>% 
+  group_by(country, div, code, date) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
 
 bsn <- 
   db2 %>% 
-  select(country, div, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
+  select(country, div, code, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
   gather(bsn_mth_i, bsn_mth_lag, key = per, value = bsn) %>% 
   mutate(date = case_when(per == "bsn_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, date) %>% 
+  group_by(country, div, code, date) %>% 
   summarise(bsn = sum(bsn)) %>% 
   ungroup()
 
@@ -40,8 +40,8 @@ pop <-
   db %>% 
   filter(month(date) == 6) %>% 
   mutate(year = year(date)) %>% 
-  select(country, div, year, exposure) %>% 
-  group_by(country, div, year) %>% 
+  select(country, div, code, year, exposure) %>% 
+  group_by(country, div, code, year) %>% 
   summarise(pop = mean(exposure) * 52) %>% 
   ungroup()
 
@@ -50,31 +50,37 @@ db3 <-
   mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
   left_join(pop) %>% 
-  filter(date >= "2020-01-01" & date <= "2021-09-30",
+  filter(date >= "2020-01-01" & date <= "2021-12-31",
          div != "Total") %>% 
   mutate(pscore = dts / bsn)
 
+# identifying regions with the highest average excess mortality
 av_pscores <- 
   db3 %>% 
-  group_by(country, div) %>% 
+  group_by(country, div, code) %>% 
   summarise(av_pscore = mean(pscore)) %>% 
   arrange(country, -av_pscore) %>% 
   ungroup() %>% 
   group_by(country) %>% 
   mutate(ord = 1:n()) %>% 
-  filter(ord <= 4)
+  filter(ord <= 4) %>% 
+  ungroup()
+
+bra_top <- 
+  av_pscores %>% 
+  filter(country == "Brazil") %>% 
+  pull(code) %>% sort
+
+col_top <- 
+  av_pscores %>% 
+  filter(country == "Colombia") %>% 
+  pull(code) %>% sort
 
 db4 <- 
   db3 %>% 
   mutate(col_div = case_when(
-    country == "Brazil" & div == "Amazonas" | 
-      country == "Brazil" & div == "Rondônia" | 
-      country == "Brazil" & div == "Mato Grosso" | 
-      country == "Brazil" & div == "Distrito Federal"  ~ paste0(div, " (Brazil)"),
-    country == "Colombia" & div == "Amazonas" | 
-      country == "Colombia" & div == "Atlantico" |
-      country == "Colombia" & div == "Bogota" |
-      country == "Colombia" & div == "Magdalena" ~ paste0(div, " (Colombia)"),
+    country == "Brazil" & code %in% bra_top  ~ paste0(div, " (Brazil)"),
+    country == "Colombia" & code %in% col_top ~ paste0(div, " (Colombia)"),
     TRUE ~ "other"),
     ident = ifelse(col_div == "other", "other", "ident"))
 
@@ -82,16 +88,16 @@ cols <-
   c("Amazonas (Brazil)" = "#e41a1c",
     "Rondônia (Brazil)" = "#377eb8",
     "Mato Grosso (Brazil)" = "#4daf4a",
-    "Distrito Federal (Brazil)" = "#984ea3",
+    "Goiás (Brazil)" = "#984ea3",
     "Amazonas (Colombia)" = "#e41a1c",
     "Atlantico (Colombia)" = "#377eb8",
     "Bogota (Colombia)" = "#4daf4a",
-    "Magdalena (Colombia)" = "#984ea3",
+    "Choco (Colombia)" = "#984ea3",
     "other" = "black")
 tx <- 8
 
 db4 %>% 
-  filter(date <= "2021-09-30") %>% 
+  filter(date <= "2021-12-31") %>% 
   ggplot(aes(date, pscore)) +
   geom_boxplot(aes(group = date), outlier.shape = NA, 
                lwd = 0.3, alpha = 0.01, col = "grey50")+
@@ -101,17 +107,18 @@ db4 %>%
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
   # scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-09-01'), by = '3 months'), 
   #              date_labels = "%b\n%Y")+
-  scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-09-01'), by = '1 month'), 
+  scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-12-01'), 
+                            by = '1 month'), 
                date_labels = "%b\n%y")+
   scale_color_manual(values = cols,
                      breaks = c("Amazonas (Brazil)",
                                 "Rondônia (Brazil)",
                                 "Mato Grosso (Brazil)",
-                                "Distrito Federal (Brazil)",
+                                "Goiás (Brazil)",
                                 "Amazonas (Colombia)",
                                 "Atlantico (Colombia)",
                                 "Bogota (Colombia)",
-                                "Magdalena (Colombia)"))+
+                                "Choco (Colombia)"))+
   scale_alpha_manual(values = c(0.8, 0.15), guide = "none")+
   scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
@@ -132,21 +139,22 @@ db4 %>%
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4))
 
-# ggsave("figures/pscores_boxplot.png", 
-#        dpi = 600,
-#        w = 12,
-#        h = 8)
-# 
-# ggsave("figures/pscores_boxplot.pdf", 
-#        w = 12,
-#        h = 8)
-# 
+ggsave("figures/pscores_boxplot.png",
+       dpi = 600,
+       w = 12,
+       h = 8)
+
+ggsave("figures/pscores_boxplot.pdf",
+       w = 12,
+       h = 8)
+
 
 # data in trimesters ====
 # ~~~~~~~~~~~~~~~~~~~~~~~
 # reading cumulative pscores
-cum_pscores <- read_rds("data_inter/trimestral_cumulative_pscores.rds")
-
+cum_pscores <- 
+  read_rds("data_inter/trimestral_cumulative_pscores.rds") %>% 
+  select(-div) 
 
 # grouping into trimesters
 trims <- seq(ymd('2020-01-01'),ymd('2021-12-31'), by = '3 months')
@@ -156,7 +164,7 @@ db5 <-
   mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
   left_join(pop) %>% 
-  filter(date >= "2020-01-01" & date < "2021-08-30",
+  filter(date >= "2020-01-01" & date < "2021-12-31",
          div != "Total") %>%
   mutate(trim_n = quarter(date),
          trimstr = case_when(year == 2020 & trim_n == 1 ~ "Jan-Mar\n2020",
@@ -165,15 +173,17 @@ db5 <-
                              year == 2020 & trim_n == 4 ~ "Oct-Dec\n2020",
                              year == 2021 & trim_n == 1 ~ "Jan-Mar\n2021",
                              year == 2021 & trim_n == 2 ~ "Apr-Jun\n2021",
-                             year == 2021 & trim_n == 3 ~ "Jul-Aug\n2021"),
+                             year == 2021 & trim_n == 3 ~ "Jul-Sep\n2021",
+                             year == 2021 & trim_n == 4 ~ "Oct-Dec\n2021"),
          trimstr = factor(trimstr, levels = c("Jan-Mar\n2020",
                                               "Apr-Jun\n2020",
                                               "Jul-Sep\n2020",
                                               "Oct-Dec\n2020",
                                               "Jan-Mar\n2021",
                                               "Apr-Jun\n2021",
-                                              "Jul-Aug\n2021"))) %>% 
-  group_by(country, div, year, trimstr) %>% 
+                                              "Jul-Sep\n2021",
+                                              "Oct-Dec\n2021"))) %>% 
+  group_by(country, div, code, year, trimstr) %>% 
   summarise(dts = sum(dts),
             bsn = sum(bsn),
             pop = mean(pop)) %>% 
@@ -189,7 +199,7 @@ divs_labs <-
   ungroup() %>% 
   filter((country == "Colombia" & ord %in% c(1, 2, 32, 33))|
            (country == "Brazil" & ord %in% c(1, 2, 26, 27))) %>% 
-  select(country, div, trimstr, pscore, ord)
+  select(country, div, code, trimstr, pscore, ord)
 
 divs_labs_cum <- 
   db5 %>% 
@@ -199,7 +209,7 @@ divs_labs_cum <-
   ungroup() %>% 
   filter((country == "Colombia" & ord2 %in% c(1, 2, 32, 33))|
            (country == "Brazil" & ord2 %in% c(1, 2, 26, 27))) %>% 
-  select(country, div, trimstr, cum_pscore, ord2)
+  select(country, div, code, trimstr, cum_pscore, ord2)
 
 divs_labs_avg <- 
   db5 %>% 
@@ -209,7 +219,7 @@ divs_labs_avg <-
   ungroup() %>% 
   filter((country == "Colombia" & ord3 %in% c(1, 2, 32, 33))|
            (country == "Brazil" & ord3 %in% c(1, 2, 26, 27))) %>% 
-  select(country, div, trimstr, cum_avg_pscore, ord3)
+  select(country, div, code, trimstr, cum_avg_pscore, ord3)
 
 db6 <- 
   db5 %>% 
@@ -267,16 +277,24 @@ db6 %>%
   geom_jitter(aes(trimstr, pscore, 
                   col = col_div, 
                   # shape = ident,
-                  alpha = ident, 
+                  alpha = ident,
                   size = pop),
-              width = 0.025, height = 0)+
-  geom_text_repel(data = divs_labs, aes(trimstr, pscore, label = div),
-            size = tx / 3, 
-            show.legend = FALSE,
-            force = 0.1, 
-            box.padding = 0.1,
-            direction = "y",
-            # nudge_x = 0.1,
+              # alpha = 0.9,
+              width = 0.025, 
+              height = 0)+
+  # geom_text_repel(data = divs_labs, aes(trimstr, pscore, label = div),
+  #           size = tx / 3,
+  #           show.legend = FALSE,
+  #           force = 0.1,
+  #           box.padding = 0.1,
+  #           direction = "y",
+  #           # nudge_x = 0.1,
+  #           hjust = -0.15)+
+  # geom_text_repel(data = divs_labs, aes(trimstr, pscore, label = div), size = 5)+
+  geom_text(data = divs_labs,
+            aes(trimstr, pscore, label = div),
+            check_overlap = TRUE,
+            size = tx / 3,
             hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
@@ -285,7 +303,8 @@ db6 %>%
   scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
-                              nrow = 1, byrow = TRUE,
+                              nrow = 1,
+                              byrow = TRUE,
                               override.aes = list(size = 3)),
          size = guide_legend(nrow = 1))+
   facet_wrap(~ country)+
@@ -325,14 +344,24 @@ db6 %>%
                   alpha = ident2, 
                   size = pop),
               width = 0.025, height = 0)+
-  geom_text_repel(data = divs_labs_cum, aes(trimstr, cum_pscore, label = div),
-                  size = tx / 3, 
-                  show.legend = FALSE,
-                  force = 0.1, 
-                  box.padding = 0.1,
-                  direction = "y",
+  # geom_text_repel(data = divs_labs_cum, aes(trimstr, cum_pscore, label = div),
+  #                 size = tx / 3, 
+  #                 show.legend = FALSE,
+  #                 force = 0.1, 
+  #                 box.padding = 0.1,
+  #                 direction = "y",
+  #                 # nudge_x = 0.1,
+  #                 hjust = -0.15)+
+  geom_text(data = divs_labs_cum, 
+            aes(trimstr, cum_pscore, label = div),
+            size = tx / 3, 
+                  # show.legend = FALSE,
+                  # force = 0.1, 
+                  # box.padding = 0.1,
+                  # direction = "y",
                   # nudge_x = 0.1,
-                  hjust = -0.15)+
+            check_overlap = TRUE, 
+            hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
   scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
@@ -380,14 +409,25 @@ db6 %>%
                   alpha = ident3, 
                   size = pop),
               width = 0.025, height = 0)+
-  geom_text_repel(data = divs_labs_avg, aes(trimstr, cum_avg_pscore, label = div),
-                  size = tx / 3, 
-                  show.legend = FALSE,
-                  force = 0.1, 
-                  box.padding = 0.1,
-                  direction = "y",
-                  # nudge_x = 0.1,
-                  hjust = -0.15)+
+  # geom_text_repel(data = divs_labs_avg, 
+  #                 aes(trimstr, cum_avg_pscore, label = div),
+  #                 size = tx / 3, 
+  #                 show.legend = FALSE,
+  #                 force = 0.1, 
+  #                 box.padding = 0.1,
+  #                 direction = "y",
+  #                 # nudge_x = 0.1,
+  #                 hjust = -0.15)+
+  geom_text(data = divs_labs_avg, 
+            aes(trimstr, cum_avg_pscore, label = div),
+            size = tx / 3, 
+            # show.legend = FALSE,
+            # force = 0.1, 
+            # box.padding = 0.1,
+            # direction = "y",
+            # nudge_x = 0.1,
+            check_overlap = TRUE, 
+            hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
   scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
