@@ -85,3 +85,17 @@ all <-
 
 write_rds(all, "data_inter/weekly_excess_confirmed_brazil_colombia.rds")
 write_csv(all, "data_inter/weekly_excess_confirmed_brazil_colombia.csv")
+
+
+# number of deaths between 2015 and 2021
+dts <- 
+  bind_rows(col_bsn2,
+          bra_bsn2) %>% 
+  filter(date >= "2015-01-01",
+         date <= "2021-12-31",
+         div == "Total") %>% 
+  group_by() %>% 
+  summarise(dts = sum(dts))
+  
+
+unique(dts$div)

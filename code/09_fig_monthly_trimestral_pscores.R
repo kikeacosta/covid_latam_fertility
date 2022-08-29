@@ -189,7 +189,14 @@ db5 <-
             pop = mean(pop)) %>% 
   ungroup() %>% 
   mutate(pscore = dts / bsn) %>%
-  left_join(cum_pscores)
+  left_join(cum_pscores) %>%
+  mutate(div = case_when(div == "San Andres" ~ "San Andrés",
+                         div == "Atlantico" ~ "Atlántico",
+                         div == "Vaupes" ~ "Vaupés",
+                         div == "Guainia" ~ "Guainía",
+                         div == "Caqueta" ~ "Caquetá",
+                         div == "Cordoba" ~ "Córdoba",
+                         TRUE ~ div))
 
 divs_labs <- 
   db5 %>% 
@@ -219,7 +226,7 @@ divs_labs_avg <-
   ungroup() %>% 
   filter((country == "Colombia" & ord3 %in% c(1, 2, 32, 33))|
            (country == "Brazil" & ord3 %in% c(1, 2, 26, 27))) %>% 
-  select(country, div, code, trimstr, cum_avg_pscore, ord3)
+  select(country, div, code, trimstr, cum_avg_pscore, ord3) 
 
 db6 <- 
   db5 %>% 
@@ -267,9 +274,9 @@ cols <-
     "Lowest p-score" = "#0a9396",
     "other" = "black")
 
-tx <- 10
+tx <- 12
 
-# trimestral pscores
+# trimester p-scores
 # ~~~~~~~~~~~~~~~~~~
 db6 %>% 
   ggplot(aes(trimstr, pscore)) +
@@ -283,7 +290,7 @@ db6 %>%
               width = 0.025, 
               height = 0)+
   # geom_text_repel(data = divs_labs, aes(trimstr, pscore, label = div),
-  #           size = tx / 3,
+  #           size = tx / 2,
   #           show.legend = FALSE,
   #           force = 0.1,
   #           box.padding = 0.1,
@@ -315,12 +322,13 @@ db6 %>%
        size = "Population")+
   theme_bw()+
   theme(legend.position = "bottom",
-        legend.title = element_text(size = tx + 3),
-        legend.text = element_text(size = tx + 2),
-        axis.text = element_text(size = tx + 2),
-        axis.title = element_text(size = tx + 3), 
+        legend.title = element_text(size = tx + 7),
+        legend.text = element_text(size = tx + 6),
+        axis.text = element_text(size = tx + 3),
+        axis.title.y = element_text(size = tx + 4), 
+        axis.title.x = element_blank(), 
         strip.background = element_rect(fill = "transparent"),
-        strip.text = element_text(size = tx + 4)) 
+        strip.text = element_text(size = tx + 10)) 
 
 ggsave("figures/pscores_boxplot_trim.pdf",
        dpi = 600,
@@ -333,7 +341,7 @@ ggsave("figures/pscores_boxplot_trim.png",
        h = 8)
 
 
-# cumulative trimestral pscores
+# cumulative trimester p-scores
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 db6 %>% 
   ggplot(aes(trimstr, cum_pscore)) +
@@ -354,7 +362,7 @@ db6 %>%
   #                 hjust = -0.15)+
   geom_text(data = divs_labs_cum, 
             aes(trimstr, cum_pscore, label = div),
-            size = tx / 3, 
+            size = tx / 2, 
                   # show.legend = FALSE,
                   # force = 0.1, 
                   # box.padding = 0.1,
