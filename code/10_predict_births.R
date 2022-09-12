@@ -1,9 +1,11 @@
 library(tidyverse)
 library(lubridate)
 library(mgcv)
+
 db <- 
   read_rds("data_inter/db_trimester_bra_col.RDS") %>% 
   as_tibble()
+
 typeof(db)
 
 db2 <- 
@@ -39,7 +41,7 @@ db2 <-
          trim_2 = ifelse(raw_trimest == "Second", 1, 0),
          trim_3 = ifelse(raw_trimest == "Third", 1, 0),
          trim_4 = ifelse(raw_trimest == "Fourth", 1, 0)) %>% 
-  filter(date <= "2021-08-15")
+  filter(date <= "2021-12-31")
 
 # testing that all combinations have complete data series
 test <- 
@@ -76,7 +78,7 @@ db3 <-
   ungroup()
 
 # visualiza example
-ct <- "COL-Bogota D.C."
+ct <- "COL-Cordoba"
 ag <- "20-24"
 ed <- "Prima-"
 
@@ -151,7 +153,7 @@ nal %>%
   geom_line(aes(date, pred_rlm, linetype = raw_edumo04), col = "blue")+
   geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
              linetype = "dashed")+
-  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2021-01-01'), by = '1 year'),
+  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
                date_labels = "%Y")+
   facet_wrap(~ISO_Code, scales = "free_y")+
   theme_bw()
@@ -160,4 +162,52 @@ ggsave("figures/births_baseline_national_levels_robustness.png",
        w = 10,
        h = 5)
 
+
+# table for sample description
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+test <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown")
+
+avs1519 <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2015:2019,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_bts_1519 = round(mean(raw_nbirth.current), 1)) %>% 
+  ungroup()
+
+avs2021 <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_bts_2021 = round(mean(raw_nbirth.current), 1)) %>% 
+  ungroup()
+
+preds <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_prd = round(mean(pred_glm), 1))
+
+pscs <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  mutate(psc = raw_nbirth.current / pred_glm) %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_psc = round(mean(psc), 2))
+
+
+
+tb1 <- 
+  avs1519 %>% 
+  left_join(preds) %>% 
+  left_join(avs2021) %>% 
+  left_join(pscs) %>% 
+  mutate(test = av_bts_2021 / av_prd)
 

@@ -16,21 +16,21 @@ db2 <-
 
 dts <- 
   db2 %>%
-  select(country, div, ini_month, dts_mth_i, dts_mth_lag) %>% 
+  select(country, div, code, ini_month, dts_mth_i, dts_mth_lag) %>% 
   gather(dts_mth_i, dts_mth_lag, key = per, value = dts) %>% 
   mutate(date = case_when(per == "dts_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, date) %>% 
+  group_by(country, div, code, date) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
 
 bsn <- 
   db2 %>% 
-  select(country, div, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
+  select(country, div, code, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
   gather(bsn_mth_i, bsn_mth_lag, key = per, value = bsn) %>% 
   mutate(date = case_when(per == "bsn_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, date) %>% 
+  group_by(country, div, code, date) %>% 
   summarise(bsn = sum(bsn)) %>% 
   ungroup()
 
@@ -38,14 +38,14 @@ db3 <-
   dts %>% 
   mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
-  filter(date >= "2020-01-01" & date <= "2021-09-30",
+  filter(date >= "2020-01-01" & date <= "2021-12-31",
          div != "Total") %>% 
   mutate(pscore = dts / bsn)
 
 db4 <- 
   db3 %>% 
   mutate(dts_exc_pos = ifelse(dts > bsn, dts - bsn, 0)) %>% 
-  group_by(country, div) %>% 
+  group_by(country, div, code) %>% 
   mutate(cum_bsn = cumsum(bsn),
          cum_dts_exc_pos = cumsum(dts_exc_pos),
          cum_avg_pscore = cumsum(pscore) / seq_along(pscore)) %>% 
@@ -78,15 +78,17 @@ db5 <-
                              year == 2020 & trim_n == 4 ~ "Oct-Dec\n2020",
                              year == 2021 & trim_n == 1 ~ "Jan-Mar\n2021",
                              year == 2021 & trim_n == 2 ~ "Apr-Jun\n2021",
-                             year == 2021 & trim_n == 3 ~ "Jul-Aug\n2021"),
+                             year == 2021 & trim_n == 3 ~ "Jul-Sep\n2021",
+                             year == 2021 & trim_n == 4 ~ "Oct-Dec\n2021"),
          trimstr = factor(trimstr, levels = c("Jan-Mar\n2020",
                                               "Apr-Jun\n2020",
                                               "Jul-Sep\n2020",
                                               "Oct-Dec\n2020",
                                               "Jan-Mar\n2021",
                                               "Apr-Jun\n2021",
-                                              "Jul-Aug\n2021"))) %>% 
-  group_by(country, div, year, trimstr) %>% 
+                                              "Jul-Sep\n2021",
+                                              "Oct-Dec\n2021"))) %>% 
+  group_by(country, div, code, year, trimstr) %>% 
   summarise(cum_pscore = mean(cum_pscore),
             cum_avg_pscore = mean(cum_avg_pscore)) %>% 
   ungroup() 

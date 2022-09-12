@@ -1,6 +1,6 @@
 source("Code/00_functions.R")
 
-col_dts_pop <- read_rds("output/colombia_deaths_population_2015_2021.rds")
+col_dts_pop <- read_rds("data_inter/colombia_deaths_population_2015_2021.rds")
 
 last_date <- "2020-03-15"
 
@@ -16,7 +16,8 @@ col_dts_pop2 <-
 col_bsn <- 
   col_dts_pop2 %>% 
   group_by(dpto) %>% 
-  do(est_baseline(db = .data))
+  do(est_baseline(db = .data)) %>% 
+  ungroup()
 
 write_rds(col_bsn, "data_inter/colombia_baseline_weekly_2015_2021.rds")
 col_bsn <- read_rds("data_inter/colombia_baseline_weekly_2015_2021.rds")
