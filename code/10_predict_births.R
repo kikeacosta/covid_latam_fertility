@@ -5,11 +5,12 @@ db <-
   read_rds("data_inter/db_trimester_bra_col.RDS") %>% 
   as_tibble()
 typeof(db)
+
 db2 <- 
   db %>% 
   mutate(ctr_reg = paste(ISO_Code, Region, sep = "-")) %>% 
   select(ctr_reg, raw_yearbir, raw_trimest, raw_mothag6, 
-         raw_edumo04, raw_nbirth.current) %>% 
+         raw_edumo04, raw_nbirth.current, raw_tbirth.current) %>% 
   # excluding "unknown" ages
   filter(raw_mothag6 != "unknown") %>% 
   mutate(raw_mothag6 = factor(raw_mothag6, 
@@ -17,7 +18,7 @@ db2 <-
                                          "30-34", "35-39", "40-54"))) %>% 
   # complete all possible combinations
   complete(ctr_reg, raw_yearbir, raw_trimest, raw_mothag6, raw_edumo04, 
-           fill = list(raw_nbirth.current = 0)) %>% 
+           fill = list(raw_nbirth.current = 0, raw_tbirth.current = 0)) %>% 
   mutate(trim = case_when(raw_trimest == "First" ~ 1,
                           raw_trimest == "Second" ~ 2,
                           raw_trimest == "Third" ~ 3,
@@ -30,8 +31,9 @@ db2 <-
   ungroup() %>% 
   mutate(w = ifelse(raw_yearbir %in% 2015:2019 | 
                       (raw_yearbir == 2020 & raw_trimest == "First"), 1, 0),
-         # increasing births in one to avoid 0s
+         # increasing births in one to avoid 0s, it will be adjusted back later
          raw_nbirth.current = raw_nbirth.current + 1,
+         raw_tbirth.current = raw_tbirth.current + 1,
          # trimester dummies for the glm model
          trim_1 = ifelse(raw_trimest == "First", 1, 0),
          trim_2 = ifelse(raw_trimest == "Second", 1, 0),
@@ -49,13 +51,20 @@ test <-
 pred_births <- function(chunk){
 
   model_glm <- 
+    glm(raw_tbirth.current ~ t + trim_1 + trim_2 + trim_3 + trim_4, 
+        weights = w,
+        data = chunk, 
+        family = quasipoisson(link = "log"))  
+  
+  model_rlm <- 
     glm(raw_nbirth.current ~ t + trim_1 + trim_2 + trim_3 + trim_4, 
         weights = w,
         data = chunk, 
         family = quasipoisson(link = "log"))  
   
   chunk %>% 
-    mutate(pred_glm = predict(model_glm, type = "response", newdata = chunk))
+    mutate(pred_glm = predict(model_glm, type = "response", newdata = chunk),
+           pred_rlm = predict(model_rlm, type = "response", newdata = chunk))
 
 }
 
@@ -76,8 +85,10 @@ db3 %>%
          raw_mothag6 == ag, 
          raw_edumo04 == ed) %>%
   ggplot()+
-  geom_line(aes(date, raw_nbirth.current), col = "black")+
+  geom_point(aes(date, raw_tbirth.current), col = "red")+
+  geom_point(aes(date, raw_nbirth.current), col = "blue")+
   geom_line(aes(date, pred_glm), col = "red", alpha = 0.6)+
+  geom_line(aes(date, pred_rlm), col = "blue", alpha = 0.6)+
   geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
              linetype = "dashed")+
   scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2021-01-01'), by = '1 year'),
@@ -90,19 +101,24 @@ out <-
   mutate(ISO_Code = str_sub(ctr_reg, 1, 3),
          Region = str_sub(ctr_reg, 5, length(ctr_reg)),
          pred_glm = ifelse(date < "2015-01-01", NA, pred_glm),
+         pred_rlm = ifelse(date < "2015-01-01", NA, pred_rlm),
          # decreasing again births in 1 to reverse the initial trick, and also 
          # in the baseline
          pred_glm = ifelse(pred_glm <= 1, 0, pred_glm - 1),
+         pred_rlm = ifelse(pred_rlm <= 1, 0, pred_rlm - 1),
+         raw_tbirth.current = raw_tbirth.current - 1,
          raw_nbirth.current = raw_nbirth.current - 1) %>% 
   select(ISO_Code, Region, raw_yearbir, raw_trimest, raw_edumo04, raw_mothag6, 
-         pred_glm = pred_glm)
+         pred_glm, pred_rlm)
   
 options(tibble.width = Inf)
 
 # merging estimates in original data
 db_out <- 
   db %>% 
-  left_join(out)
+  left_join(out) %>% 
+  arrange(raw_country, Region,
+          raw_mothag6, raw_edumo04, raw_yearbir, raw_trimest)
 
 write_rds(db_out, "data_inter/db_trimester_bra_col_ea.RDS")
 
@@ -112,19 +128,27 @@ nal <-
   mutate(ISO_Code = str_sub(ctr_reg, 1, 3),
          Region = str_sub(ctr_reg, 5, length(ctr_reg)),
          pred_glm = ifelse(pred_glm <= 1, 0, pred_glm - 1),
-         raw_nbirth.current = raw_nbirth.current - 1) %>% 
+         pred_rlm = ifelse(pred_rlm <= 1, 0, pred_rlm - 1),
+         raw_nbirth.current = raw_nbirth.current - 1,
+         raw_tbirth.current = raw_tbirth.current - 1) %>% 
   group_by(ISO_Code, date, raw_yearbir, raw_trimest, raw_edumo04) %>% 
-  summarise(bts = sum(raw_nbirth.current),
-            pred_glm = sum(pred_glm)) %>% 
+  summarise(bts_n = sum(raw_tbirth.current),
+            bts_r = sum(raw_nbirth.current),
+            pred_glm = sum(pred_glm),
+            pred_rlm = sum(pred_rlm)) %>% 
   ungroup()
 
 
 nal %>% 
-  mutate(pred_glm = ifelse(date < "2015-01-01", NA, pred_glm)) %>% 
+  mutate(pred_glm = ifelse(date < "2015-01-01", NA, pred_glm),
+         pred_rlm = ifelse(date < "2015-01-01", NA, pred_rlm)) %>% 
   ggplot()+
-  geom_line(aes(date, bts, linetype = raw_edumo04, group = raw_edumo04), 
-            col = "black")+
+  geom_point(aes(date, bts_n, linetype = raw_edumo04, group = raw_edumo04), 
+            col = "red")+
+  geom_point(aes(date, bts_r, linetype = raw_edumo04, group = raw_edumo04), 
+            col = "blue")+
   geom_line(aes(date, pred_glm, linetype = raw_edumo04), col = "red")+
+  geom_line(aes(date, pred_rlm, linetype = raw_edumo04), col = "blue")+
   geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
              linetype = "dashed")+
   scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2021-01-01'), by = '1 year'),
@@ -132,7 +156,7 @@ nal %>%
   facet_wrap(~ISO_Code, scales = "free_y")+
   theme_bw()
 
-ggsave("figures/births_baseline_national_levels.png",
+ggsave("figures/births_baseline_national_levels_robustness.png",
        w = 10,
        h = 5)
 
