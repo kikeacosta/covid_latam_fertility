@@ -1,0 +1,28 @@
+﻿state_name,state_num,state_iso,region
+ Rondônia,11,RO,N
+ Acre,12,AC,N
+ Amazonas,13,AM,N
+ Roraima,14,RR,N
+ Pará,15,PA,N
+ Amapá,16,AP,N
+ Tocantins,17,TO,N
+ Maranhão,21,MA,NE
+ Piauí,22,PI,NE
+ Ceará,23,CE,NE
+ Rio Grande do Norte,24,RN,NE
+ Paraíba,25,PB,NE
+ Pernambuco,26,PE,NE
+ Alagoas,27,AL,NE
+ Sergipe,28,SE,NE
+ Bahia,29,BA,NE
+ Minas Gerais,31,MG,SE
+ Espírito Santo,32,ES,SE
+ Rio de Janeiro,33,RJ,SE
+ São Paulo,35,SP,SE
+ Paraná,41,PR,S
+ Santa Catarina,42,SC,S
+ Rio Grande do Sul,43,RS,S
+ Mato Grosso do Sul,50,MS,CW
+ Mato Grosso,51,MT,CW
+ Goiás,52,GO,CW
+ Distrito Federal,53,DF,CW
