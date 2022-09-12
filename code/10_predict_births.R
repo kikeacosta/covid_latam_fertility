@@ -6,14 +6,25 @@ db <-
   read_rds("data_inter/db_trimester_bra_col.RDS") %>% 
   as_tibble()
 
+typeof(db)
+
+# testing imputation
+# ~~~~~~~~~~~~~~~~~~
 test <- 
   db %>% 
   mutate(ctr_reg = paste(ISO_Code, Region, sep = "-")) %>% 
   select(ctr_reg, raw_yearbir, raw_trimest, raw_mothag6, raw_edumo04, 
-         raw_nbirth.current, raw_tbirth.current, raw_lbirth.current)
+         raw_nbirth.current, raw_tbirth.current, raw_lbirth.current,
+         raw_ibirth)
 
-typeof(db)
+test2 <- 
+  test %>% 
+  filter(ctr_reg == ct,
+         raw_mothag6 == ag)
 
+
+# adjusting data for baseline estimations
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 db2 <- 
   db %>% 
   mutate(ctr_reg = paste(ISO_Code, Region, sep = "-")) %>% 
@@ -59,7 +70,6 @@ test <-
   summarise(obs = n())
 
 
-
 # visualizing births
 
 ct <- "COL-Bogota D.C."
@@ -88,7 +98,8 @@ test <-
 
 
 
-# function for glm model
+# function for glm models, according to imputation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 pred_births <- function(chunk){
 
   model_glm <- 
@@ -263,7 +274,6 @@ pscs <-
   mutate(psc = raw_nbirth.current / pred_glm) %>% 
   group_by(raw_country, Region) %>% 
   summarise(av_psc = round(mean(psc), 2))
-
 
 
 tb1 <- 
