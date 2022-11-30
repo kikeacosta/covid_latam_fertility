@@ -70,29 +70,35 @@ av_pscores <-
 bra_top <- 
   av_pscores %>% 
   filter(country == "Brazil") %>% 
-  pull(code) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(code)
 
 av_pscores %>% 
   filter(country == "Brazil") %>% 
-  pull(div) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(div)
 
 col_top <- 
   av_pscores %>% 
   filter(country == "Colombia") %>% 
-  pull(code) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(code)
 
 av_pscores %>% 
   filter(country == "Colombia") %>% 
-  pull(div) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(div)
 
 mex_top <- 
   av_pscores %>% 
   filter(country == "Mexico") %>% 
-  pull(code) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(code)
 
 av_pscores %>% 
   filter(country == "Mexico") %>% 
-  pull(div) %>% sort
+  arrange(-av_pscore) %>% 
+  pull(div)
 
 
 db4 <- 
@@ -105,18 +111,18 @@ db4 <-
     ident = ifelse(col_div == "other", "other", "ident"))
 
 cols <- 
-  c("Amazonas (Brazil)" = "#e41a1c",
-    "Rondania (Brazil)" = "#377eb8",
+  c("Rondania (Brazil)" = "#e41a1c",
+    "Amazonas (Brazil)" = "#377eb8",
     "Mato Grosso (Brazil)" = "#4daf4a",
     "Distrito Federal (Brazil)" = "#984ea3",
     "Amazonas (Colombia)" = "#e41a1c",
     "Atlantico (Colombia)" = "#377eb8",
-    "Guainia (Colombia)" = "#4daf4a",
-    "San Andres (Colombia)" = "#984ea3",
-    "Ciudad de Mexico (Mexico)" = "#e41a1c",
-    "Mexico (Mexico)" = "#377eb8",
-    "Puebla (Mexico)" = "#4daf4a",
-    "Tlaxcala (Mexico)" = "#984ea3",
+    "San Andres (Colombia)" = "#4daf4a",
+    "Guainia (Colombia)" = "#984ea3",
+    "Tlaxcala (Mexico)" = "#e41a1c",
+    "Ciudad de Mexico (Mexico)" = "#377eb8",
+    "Mexico (Mexico)" = "#4daf4a",
+    "Puebla (Mexico)" = "#984ea3",
     "other" = "black")
 tx <- 8
 
@@ -129,32 +135,30 @@ db4 %>%
               width = 3, height = 0)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
-  # scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-09-01'), by = '3 months'), 
-  #              date_labels = "%b\n%Y")+
   scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-12-01'), 
                             by = '2 month'), 
                date_labels = "%b\n%y")+
   scale_color_manual(values = cols,
-                     breaks = c("Amazonas (Brazil)",
-                                "Rondania (Brazil)",
+                     breaks = c("Rondania (Brazil)",
+                                "Amazonas (Brazil)",
                                 "Mato Grosso (Brazil)",
                                 "Distrito Federal (Brazil)",
                                 "Amazonas (Colombia)",
                                 "Atlantico (Colombia)",
-                                "Guainia (Colombia)",
                                 "San Andres (Colombia)",
+                                "Guainia (Colombia)",
+                                "Tlaxcala (Mexico)",
                                 "Ciudad de Mexico (Mexico)",
                                 "Mexico (Mexico)",
-                                "Puebla (Mexico)",
-                                "Tlaxcala (Mexico)"))+
+                                "Puebla (Mexico)"))+
   scale_alpha_manual(values = c(0.8, 0.15), guide = "none")+
-  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 
+                                   5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
                               nrow = 3, byrow = TRUE,
                               override.aes = list(size = 2.5, alpha = 0.8)),
          size = guide_legend(nrow = 2, byrow = T))+
-  # scale_size_continuous(guide = "none")+
   facet_wrap(~ country)+
   geom_hline(yintercept = 1, linetype = "dashed")+
   labs(y = "Excess p-score", x = "Month",
@@ -265,19 +269,22 @@ db6 <-
                              ord > 2 ~ "Lowest p-score",
                              TRUE ~ "other"),
          col_div = factor(col_div, 
-                          levels = c("Lowest p-score", "Highest p-score", "other")),
+                          levels = c("Lowest p-score", 
+                                     "Highest p-score", "other")),
          ident = ifelse(col_div == "other", "other", "ident"),
          col_div2 = case_when(ord2 <= 2 ~ "Highest p-score",
                               ord2 > 2 ~ "Lowest p-score",
                               TRUE ~ "other"),
          col_div2 = factor(col_div2, 
-                           levels = c("Lowest p-score", "Highest p-score", "other")),
+                           levels = c("Lowest p-score", 
+                                      "Highest p-score", "other")),
          ident2 = ifelse(col_div2 == "other", "other", "ident"),
          col_div3 = case_when(ord3 <= 2 ~ "Highest p-score",
                               ord3 > 2 ~ "Lowest p-score",
                               TRUE ~ "other"),
          col_div3 = factor(col_div3, 
-                           levels = c("Lowest p-score", "Highest p-score", "other")),
+                           levels = c("Lowest p-score", 
+                                      "Highest p-score", "other")),
          ident3 = ifelse(col_div3 == "other", "other", "ident")) 
 
 
@@ -333,9 +340,11 @@ db6 %>%
             hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
-  scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
+  scale_color_manual(values = cols, breaks = c("Lowest p-score", 
+                                               "Highest p-score"))+
   scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
-  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 
+                                   5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
                               nrow = 1,
@@ -400,9 +409,11 @@ db6 %>%
             hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
-  scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
+  scale_color_manual(values = cols, breaks = c("Lowest p-score", 
+                                               "Highest p-score"))+
   scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
-  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 
+                                   5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
                               nrow = 1, byrow = TRUE,
@@ -466,9 +477,11 @@ db6 %>%
             hjust = -0.15)+
   scale_y_log10(labels = function(x) paste0((x - 1) * 100, "%"), 
                 breaks = c(0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4, 5))+
-  scale_color_manual(values = cols, breaks = c("Lowest p-score", "Highest p-score"))+
+  scale_color_manual(values = cols, breaks = c("Lowest p-score", 
+                                               "Highest p-score"))+
   scale_alpha_manual(values = c(0.8, 0.2), guide = "none")+
-  scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
+  scale_size_continuous(breaks = c(100000, 500000, 1000000, 
+                                   5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
                               nrow = 1, byrow = TRUE,
