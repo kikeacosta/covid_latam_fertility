@@ -8,15 +8,15 @@ last_date <- "2020-03-15"
 mex_dts_pop2 <- 
   mex_dts_pop %>% 
   mutate(exposure = pop / 52) %>% 
-  arrange(region, date) %>% 
-  group_by(region) %>% 
+  arrange(div, date) %>% 
+  group_by(div) %>% 
   mutate(t = 1:n(),
          w = ifelse(date <= "2020-03-15", 1, 0)) %>% 
   ungroup()
 
 mex_bsn <- 
   mex_dts_pop2 %>% 
-  group_by(region) %>% 
+  group_by(div) %>% 
   do(est_baseline(db = .data)) %>% 
   ungroup()
 
@@ -38,7 +38,7 @@ mex_bsn %>%
              linewidth = 0.3)+
   scale_color_manual(values = c("#073b4c", "#ef476f"))+
   scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
-  facet_wrap(~ region, scales = "free", ncol = 1)+
+  facet_wrap(~ div, scales = "free", ncol = 1)+
   theme_bw()+
   theme(
     legend.position = "none",
@@ -63,7 +63,7 @@ ggsave("figures/mexico_baseline_weekly_deaths_by_state.pdf",
 mex_exc <- 
   mex_bsn %>% 
   filter(year >= 2020) %>% 
-  select(region, date, isoweek, dts, bsn, exposure) %>% 
+  select(div, date, isoweek, dts, bsn, exposure) %>% 
   mutate(excess = dts / bsn,
          pscore = dts / bsn)
 

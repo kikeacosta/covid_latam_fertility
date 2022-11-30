@@ -1,6 +1,7 @@
 library(tidyverse)
 library(lubridate)
 library(readxl)
+library(ISOweek)
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # deaths by state and week ====
@@ -8,30 +9,12 @@ library(readxl)
 des <- read_rds("data_input/mexico/mexico_region_codes.rds")
 
 # des <- 
-#   des %>% mutate(region = ifelse(region == "Veracruz de Ignacio de la Llave", "Veracruz", region) )
-# write_rds(des, "data_input/mexico/mexico_region_codes.rds")
-
-temp <- read_rds("data_input/mexico/mort2021.rds") 
-
-# mex_est <- 
 #   des %>% 
-#   as_tibble() %>% 
-#   filter(CVE_MUN == "000",
-#          !CVE_ENT %in% as.character(33:99)) %>% 
-#   select(-CVE_MUN, -CVE_LOC, region = NOM_LOC, cod_reg = CVE_ENT) %>% 
-#   mutate(region = as.character(region),
-#          cod_reg = as.character(cod_reg)) %>% 
-#   mutate(region = case_when(cod_reg == "09" ~ "Ciudad de Mexico",
-#                             cod_reg == "15" ~ "Mexico",
-#                             cod_reg == "16" ~ "Michoacan",
-#                             cod_reg == "19" ~ "Nuevo Leon",
-#                             cod_reg == "22" ~ "Queretaro",
-#                             cod_reg == "24" ~ "San Luis Potosi",
-#                             cod_reg == "3" ~ "Veracruz",
-#                             cod_reg == "31" ~ "Yucatan",
-#                             TRUE ~ region))
+#   mutate(region = ifelse(region == "Coahuila de Zaragoza",
+#                          "Coahuila",
+#                          region))
 # 
-# write_rds(mex_est, "data_input/mexico/mexico_region_codes.rds")
+# write_rds(des, "data_input/mexico/mexico_region_codes.rds")
 y <- 14
 wk_dts <- tibble()
 for(y in 14:21){
@@ -76,41 +59,59 @@ wk_dts3 <-
               ungroup() %>% 
               mutate(region = "Total")) %>% 
   mutate(isoweek = paste0(isoweek, "-1"),
-         date = ISOweek2date(isoweek))
-# %>% 
-#   mutate(region = ifelse(region == "Veracruz de Ignacio de la Llave", "Veracruz", region))
-
+         date = ISOweek2date(isoweek)) %>% 
+  rename(div = region)
 
 # ~~~~~~~~~~~~~~~
 # population ====
 # ~~~~~~~~~~~~~~~
 
 # population by week for each state
+locale=locale(encoding="latin1")
 pop <- 
-  read_xlsx("data_input/mexico/Poblacion_01.xlsx",
-         skip = 4) %>% 
-  select(region = 1,
-         y2000 = 3,
-         y2005 = 4,
-         y2010 = 5,
-         y2020 = 6) %>% 
-  mutate(region = case_when(region == "Estados Unidos Mexicanos" ~ "Total",
-                            region == "México" ~ "Mexico",
-                            region == "Ciudad de México" ~ "Ciudad de Mexico",
-                            region == "Michoacán de Ocampo" ~ "Michoacan",
-                            region == "Nuevo León" ~ "Nuevo Leon",
-                            region == "Querétaro" ~ "Queretaro",
-                            region == "San Luis Potosí" ~ "San Luis Potosi",
-                            region == "Veracruz de Ignacio de la Llave" ~ "Veracruz",
-                            region == "Yucatán" ~ "Yucatan",
-                            TRUE ~ region)) %>% 
-  drop_na() %>% 
-  gather(-region, key = year, value = pop) %>% 
-  mutate(year = str_replace(year, "y", "") %>% as.integer(),
-         t = case_when(year == 2000 ~ 1,
-                          year == 2005 ~ 262,
-                          year == 2010 ~ 523,
-                          year == 2020 ~ 1044))
+  read_csv("data_input/mexico/pob_mit_proyecciones_no_special_characters.csv",
+           locale = locale(encoding = "UTF-8"))
+
+pop2 <- 
+  pop %>%
+  select(year = ANO,
+         div = ENTIDAD,
+         age = EDAD,
+         sex = SEXO,
+         pop = POBLACION) %>% 
+  mutate(div = case_when(div == "Republica Mexicana" ~ "Total",
+                         TRUE ~ div)) %>% 
+  group_by(year, div) %>% 
+  summarise(pop = sum(pop)) %>% 
+  ungroup() %>% 
+  filter(year %in% 2000:2025) 
+
+unique(pop2$div)
+
+# years with 53 weeks 2000-2025
+leap_yrs <- 
+  tibble(year = 2000:2025) %>% 
+  mutate(isoweek = paste0(year, "-W53-7"),
+         date = ISOweek2date(isoweek),
+         isoweek2 = date2ISOweek(date),
+         equal = ifelse(isoweek == isoweek2, "y", "n")) %>% 
+  filter(equal == "y") %>% 
+  pull(year)
+
+# locate week at the mid-year 2000-2025 
+wk_midyear <- 
+  tibble(year = 2000:2025) %>% 
+  mutate(wks = ifelse(year %in% leap_yrs, 53, 52),
+         hlf = wks/2,
+         t = cumsum(wks) - 26) %>% 
+  select(year, t)
+
+
+pop3 <- 
+  pop2 %>% 
+  left_join(wk_midyear) %>% 
+  mutate(t = round(t))
+
 
 # Interpolating exposures to weeks  
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -124,38 +125,29 @@ interpop <- function(db)
     mutate(pop2 = spline(xs, ys, xout = ts)$y)
 }
 
-leap_yrs <- 
-  tibble(year = 2000:2025) %>% 
-  mutate(isoweek = paste0(year, "-W53-7"),
-         date = ISOweek2date(isoweek),
-         isoweek2 = date2ISOweek(date),
-         equal = ifelse(isoweek == isoweek2, "y", "n")) %>% 
-  filter(equal == "y") %>% 
-  pull(year)
-
 pop_interpol <- 
-  expand_grid(year = 2000:2022, week = 1:52, region = pop$region %>% unique()) %>% 
-  bind_rows(expand_grid(year = leap_yrs, week = 53, region = pop$region %>% unique())) %>% 
-  arrange(region, year, week) %>% 
-  group_by(region) %>% 
+  expand_grid(year = 2000:2022, week = 1:52, div = pop3$div %>% unique()) %>% 
+  bind_rows(expand_grid(year = leap_yrs, week = 53, div = pop3$div %>% unique())) %>% 
+  arrange(div, year, week) %>% 
+  group_by(div) %>% 
   mutate(t = 1:n()) %>% 
   ungroup() %>% 
-  left_join(pop) %>% 
-  group_by(region) %>% 
+  left_join(pop3) %>%  
+  group_by(div) %>% 
   do(interpop(db = .data)) %>% 
   ungroup() %>% 
   mutate(isoweek = paste0(year, "-W", sprintf("%02d",week), "-1"),
          date = ISOweek2date(isoweek))
   
 pop_interpol %>%
-  filter(region == "Total") %>%
+  filter(div == "Total") %>%
   ggplot()+
   geom_line(aes(t, pop2))+
   geom_point(aes(t, pop))
 
 pop_int2 <- 
   pop_interpol %>% 
-  select(region, date, pop = pop2)
+  select(div, date, pop = pop2)
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -167,3 +159,4 @@ dts_pop <-
   mutate(week = str_sub(isoweek, 7, 8) %>% as.integer())
 
 write_rds(dts_pop, "data_inter/mexico_deaths_population_2015_2021.rds")
+

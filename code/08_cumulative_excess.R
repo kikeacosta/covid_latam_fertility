@@ -1,7 +1,7 @@
 source("Code/00_functions.R")
 
 db <- 
-  read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
+  read_rds("data_inter/weekly_excess_confirmed_brazil_colombia_mexico.rds")
 
 # from weekly to monthly deaths 
 db2 <- 

@@ -1,9 +1,10 @@
+rm(list=ls())
 library(tidyverse)
 library(lubridate)
 library(ggrepel)
 library(ggridges)
 
-db <- read_rds("data_inter/weekly_excess_confirmed_brazil_colombia.rds")
+db <- read_rds("data_inter/weekly_excess_confirmed_brazil_colombia_mexico.rds")
 
 # from weekly to monthly deaths 
 db2 <- 
@@ -71,28 +72,51 @@ bra_top <-
   filter(country == "Brazil") %>% 
   pull(code) %>% sort
 
+av_pscores %>% 
+  filter(country == "Brazil") %>% 
+  pull(div) %>% sort
+
 col_top <- 
   av_pscores %>% 
   filter(country == "Colombia") %>% 
   pull(code) %>% sort
+
+av_pscores %>% 
+  filter(country == "Colombia") %>% 
+  pull(div) %>% sort
+
+mex_top <- 
+  av_pscores %>% 
+  filter(country == "Mexico") %>% 
+  pull(code) %>% sort
+
+av_pscores %>% 
+  filter(country == "Mexico") %>% 
+  pull(div) %>% sort
+
 
 db4 <- 
   db3 %>% 
   mutate(col_div = case_when(
     country == "Brazil" & code %in% bra_top  ~ paste0(div, " (Brazil)"),
     country == "Colombia" & code %in% col_top ~ paste0(div, " (Colombia)"),
+    country == "Mexico" & code %in% mex_top ~ paste0(div, " (Mexico)"),
     TRUE ~ "other"),
     ident = ifelse(col_div == "other", "other", "ident"))
 
 cols <- 
   c("Amazonas (Brazil)" = "#e41a1c",
-    "Rondônia (Brazil)" = "#377eb8",
+    "Rondania (Brazil)" = "#377eb8",
     "Mato Grosso (Brazil)" = "#4daf4a",
-    "Goiás (Brazil)" = "#984ea3",
+    "Distrito Federal (Brazil)" = "#984ea3",
     "Amazonas (Colombia)" = "#e41a1c",
     "Atlantico (Colombia)" = "#377eb8",
-    "Bogota (Colombia)" = "#4daf4a",
-    "Choco (Colombia)" = "#984ea3",
+    "Guainia (Colombia)" = "#4daf4a",
+    "San Andres (Colombia)" = "#984ea3",
+    "Ciudad de Mexico (Mexico)" = "#e41a1c",
+    "Mexico (Mexico)" = "#377eb8",
+    "Puebla (Mexico)" = "#4daf4a",
+    "Tlaxcala (Mexico)" = "#984ea3",
     "other" = "black")
 tx <- 8
 
@@ -108,22 +132,26 @@ db4 %>%
   # scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-09-01'), by = '3 months'), 
   #              date_labels = "%b\n%Y")+
   scale_x_date(breaks = seq(ymd('2020-01-01'), ymd('2021-12-01'), 
-                            by = '1 month'), 
+                            by = '2 month'), 
                date_labels = "%b\n%y")+
   scale_color_manual(values = cols,
                      breaks = c("Amazonas (Brazil)",
-                                "Rondônia (Brazil)",
+                                "Rondania (Brazil)",
                                 "Mato Grosso (Brazil)",
-                                "Goiás (Brazil)",
+                                "Distrito Federal (Brazil)",
                                 "Amazonas (Colombia)",
                                 "Atlantico (Colombia)",
-                                "Bogota (Colombia)",
-                                "Choco (Colombia)"))+
+                                "Guainia (Colombia)",
+                                "San Andres (Colombia)",
+                                "Ciudad de Mexico (Mexico)",
+                                "Mexico (Mexico)",
+                                "Puebla (Mexico)",
+                                "Tlaxcala (Mexico)"))+
   scale_alpha_manual(values = c(0.8, 0.15), guide = "none")+
   scale_size_continuous(breaks = c(100000, 500000, 1000000, 5000000, 10000000, 40000000),
                         labels = c("100K", "500K", "1M", "5M", "10M", "40M"))+
   guides(color = guide_legend(order = 1,
-                              nrow = 2, byrow = TRUE,
+                              nrow = 3, byrow = TRUE,
                               override.aes = list(size = 2.5, alpha = 0.8)),
          size = guide_legend(nrow = 2, byrow = T))+
   # scale_size_continuous(guide = "none")+
@@ -139,13 +167,13 @@ db4 %>%
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4))
 
-ggsave("figures/pscores_boxplot.png",
+ggsave("figures/pscores_boxplot_v2.png",
        dpi = 600,
-       w = 12,
+       w = 16,
        h = 8)
 
-ggsave("figures/pscores_boxplot.pdf",
-       w = 12,
+ggsave("figures/pscores_boxplot_v2.pdf",
+       w = 16,
        h = 8)
 
 
