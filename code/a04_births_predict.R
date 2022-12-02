@@ -204,6 +204,12 @@ exclude <-
   separate(ctr_geo, c("country", "geo")) %>%  
   select(-bts_tot, -bts_avg, -n)
 
+exclude <- 
+  tot_avs %>% 
+  filter(bts_avg < 3) %>% 
+  separate(ctr_geo, c("country", "geo")) %>%  
+  select(-bts_avg, -n)
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # ~~~~~~~~~~~~~~~
