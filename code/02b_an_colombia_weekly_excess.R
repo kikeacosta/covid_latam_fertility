@@ -27,9 +27,9 @@ col_bsn %>%
   mutate(excess = ifelse(date > last_date & dts > ul, "y", "n")) %>% 
   ggplot()+
   geom_ribbon(aes(date, ymin = ll_r, ymax = ul_r), alpha = 0.2, fill = "#118ab2")+
-  geom_line(aes(date, ll_r), size = 0.1, alpha = 0.3, col = "#118ab2")+
-  geom_line(aes(date, ul_r), size = 0.1, alpha = 0.3, col = "#118ab2")+
-  geom_line(aes(date, dts_r), size = 0.2, alpha = 0.2)+
+  geom_line(aes(date, ll_r), linewidth = 0.1, alpha = 0.3, col = "#118ab2")+
+  geom_line(aes(date, ul_r), linewidth = 0.1, alpha = 0.3, col = "#118ab2")+
+  geom_line(aes(date, dts_r), linewidth = 0.2, alpha = 0.2)+
   geom_line(aes(date, bsn_r), col = "#118ab2", alpha = 0.8)+
   geom_point(aes(date, dts_r, col = excess), size = 0.3, alpha = 0.7)+
   geom_vline(xintercept = ymd("2020-02-15"), linetype = "dashed", 
