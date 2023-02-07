@@ -1,0 +1,401 @@
+library(tidyverse)
+library(lubridate)
+dt <- read_rds("data_inter/db_monthly_bra_col_mex.RDS")
+
+dt2 <- 
+  dt %>% 
+  as_tibble() %>% 
+  select(country = raw_country, 
+         geo = raw_geo1nam,
+         year = raw_yearbir, 
+         mth = raw_montbir,
+         age = raw_mothag3, 
+         edu = raw_edumo04,
+         bts_n = raw_nbirth,
+         bts_i = raw_ibirth,
+         bts_t = raw_tbirth)
+
+unique(dt2$age)
+unique(dt2$edu)
+
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# # imputations of missing age and education ====
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# 
+# # ~~~~~~~~~~~~~~~~~~
+# # imputing education
+# # ~~~~~~~~~~~~~~~~~~
+# tot_edu <- 
+#   dt2 %>% 
+#   group_by(country, year, trim, geo, age) %>% 
+#   summarise(bts_tot = sum(bts, na.rm = T)) %>% 
+#   ungroup()
+# 
+# mis_edu <- 
+#   dt2 %>% 
+#   filter(edu == "unknown") %>% 
+#   select(everything(), -edu, -ident, bts_unk = bts)
+#   
+# dt3 <- 
+#   dt2 %>%
+#   filter(edu != "unknown") %>% 
+#   left_join(tot_edu) %>% 
+#   left_join(mis_edu) %>% 
+#   replace_na(list(bts_unk = 0)) %>% 
+#   group_by(country, year, trim, geo, age) %>% 
+#   # two different ways of imputation
+#   mutate(bts_i = bts_tot*bts/sum(bts),
+#          bts_t = ifelse(edu == "0-3", bts + bts_unk, bts)) %>% 
+#   ungroup()
+# 
+# dt4 <- 
+#   dt3 %>% 
+#   select(-bts_tot, - bts_unk)
+# 
+# # ~~~~~~~~~~~~~~~~~~
+# # imputing age
+# # ~~~~~~~~~~~~~~~~~~
+# tot_age <- 
+#   dt4 %>% 
+#   group_by(country, year, trim, geo, edu) %>% 
+#   summarise(bts_i_tot = sum(bts_i, na.rm = T),
+#             bts_t_tot = sum(bts_t, na.rm = T)) %>% 
+#   ungroup()
+# 
+# dt5 <- 
+#   dt4 %>%
+#   filter(age != "unknown") %>% 
+#   left_join(tot_age) %>% 
+#   group_by(country, year, trim, geo, edu) %>% 
+#   mutate(bts_i = bts_i_tot*bts_i/sum(bts_i),
+#          bts_t = bts_t_tot*bts_t/sum(bts_t)) %>% 
+#   select(-bts_i_tot, -bts_t_tot)
+# 
+# # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# ~~~~~~~~~~~~~
+# adding totals ====
+# ~~~~~~~~~~~~~
+# country, year, trim, geo, age, edu
+
+dt3 <- 
+  dt2 %>% 
+  # adding total education
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, geo, age) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                edu = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total ages
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, geo, edu) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                age = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total country
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, age, edu) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                geo = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total education and age
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, geo) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                edu = "total",
+                age = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total education and country
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, age) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                edu = "total",
+                geo = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total age and country
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth, edu) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                age = "total",
+                geo = "total") %>% 
+      ungroup()
+  ) %>% 
+  # adding total region, education, and age
+  bind_rows(
+    dt2 %>% 
+      group_by(country, year, mth) %>% 
+      summarise(bts_n = sum(bts_n),
+                bts_i = sum(bts_i),
+                bts_t = sum(bts_t),
+                geo = "total",
+                edu = "total",
+                age = "total") %>% 
+      ungroup()
+  ) %>% 
+  mutate(date = make_date(d = 15, m = mth, y = year))
+
+
+# ~~~~~~~~~~~~~~~
+# master database
+# ~~~~~~~~~~~~~~~
+
+dt4 <- 
+  dt3 %>% 
+  group_by(country, geo, age, edu) %>%
+  arrange(date) %>%
+  mutate(t = 1:n()) %>%
+  ungroup() %>%
+  mutate(w = ifelse(date < "2020-03-01", 1, 0))
+
+test <- 
+  dt4 %>% 
+  group_by(country, geo, edu, age) %>% 
+  summarise(n = n(),
+            bts = sum(bts_i)) %>% 
+  ungroup()
+
+
+dt5 <- 
+  dt4 %>% 
+  group_by(country, geo, age, edu) %>%
+  do(pred_births(chunk = .data)) %>% 
+  ungroup()
+
+
+# ~~~~~~~~~
+# functions
+# ~~~~~~~~~
+
+library(mgcv)
+
+# for testing the function
+chunk <-
+  dt4 %>%
+  filter(geo == "Amazonía",
+         edu == "8-11",
+         age == "20-29") %>% 
+  mutate(bts = bts_i)
+
+pred_births <- function(chunk){
+  
+  model <- 
+    gam(bts ~ t + s(mth, bs = 'cp'), 
+        weights = w,
+        data = chunk, 
+        family = "quasipoisson")
+  
+  
+  test <- 
+    try(
+      pred <- 
+        predict(model, 
+                type = "response", 
+                se.fit = T,
+                newdata = chunk)
+    )
+  
+  try(
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = pred$fit,
+             bsn_lc = bsn - 1.96 * pred$se.fit,
+             bsn_uc = bsn + 1.96 * pred$se.fit) %>% 
+      left_join(simul_intvals_no_off(model, 
+                                     model_type = "gam", 
+                                     db = chunk, 
+                                     nsim = 100,
+                                     p = 0.95),
+                by = "t")
+  )
+  
+  if(class(test) == "try-error"){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = NA,
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_lp = NA,
+             bsn_up = NA)
+  }
+  return(chunk2)
+}
+
+simul_intvals_no_off <-
+  function(
+    # fitted model
+    model,
+    # either GLM or GAM (needed for model matrix extraction step)
+    model_type,
+    # prediction data
+    db,
+    # number of iterations
+    nsim,
+    # prediction intervals' uncertainty level (between 0 and 1)
+    p
+  ){
+    
+    # defining upper and lower prediction quantiles
+    lp <- (1 - p) / 2
+    up <- 1 - lp
+    
+    # matrix model extraction
+    if(model_type == "glm"){
+      X_prd <- model.matrix(model, data = db, na.action = na.pass)
+    }
+    if(model_type == "gam"){
+      X_prd <- predict(model, newdata = db, type = 'lpmatrix')
+    }
+    
+    # estimated coefficients
+    beta <- coef(model)
+    
+    # extracting variance covariance matrix
+    beta_sim <- MASS::mvrnorm(nsim,
+                              coef(model),
+                              suppressWarnings(vcov(model)))
+    
+    # simulation process
+    Ey_sim <- apply(beta_sim, 1, FUN = function (b) exp(X_prd %*% b))
+    
+    y_sim <- apply(Ey_sim, 2, FUN = function (Ey) {
+      y <- mu <- Ey
+      # NA's can't be passed to the simulation functions, so keep them out
+      idx_na <- is.na(mu)
+      mu_ <- mu[!idx_na]
+      N <- length(mu_)
+      phi <- suppressWarnings(summary(model)$dispersion)
+      # in case of under-dispersion, sample from Poisson
+      if (phi < 1) { phi = 1 }
+      y[!idx_na] <- rnbinom(n = N, mu = mu_, size = mu_/(phi-1))
+      return(y)
+    })
+    
+    # from wide to tidy format
+    ints_simul <-
+      db %>%
+      select(t)
+    
+    colnames_y_sim <- paste0('bsn_sim', 1:nsim)
+    
+    ints_simul[,colnames_y_sim] <- y_sim
+    
+    # prediction intervals output
+    ints_simul <-
+      ints_simul %>%
+      pivot_longer(cols = starts_with('bsn_sim'),
+                   names_to = 'sim_id', values_to = 'bsn_sim') %>%
+      group_by(t) %>%
+      summarise(
+        bsn_lp = quantile(bsn_sim, lp, na.rm = TRUE),
+        bsn_up = quantile(bsn_sim, up, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    return(ints_simul)
+  }
+
+
+# ~~~~~~~~~~~~~~~~~~~
+# baseline estimation
+# ~~~~~~~~~~~~~~~~~~~
+dt5 <- 
+  dt4 %>% 
+  # using imputation i (bts_i)
+  mutate(bts = bts_i) %>% 
+  group_by(country, geo, age, edu) %>%
+  do(pred_births(chunk = .data)) %>% 
+  ungroup() %>% 
+  rename(bsn_i = bsn,
+         bsn_i_lc = bsn_lc,
+         bsn_i_uc = bsn_uc,
+         bsn_i_lp = bsn_lp,
+         bsn_i_up = bsn_up) %>% 
+  # using imputation t (bts_t)
+  mutate(bts = bts_t) %>% 
+  group_by(country, geo, edu, age) %>% 
+  do(pred_births(chunk = .)) %>% 
+  ungroup() %>% 
+  rename(bsn_t = bsn,
+         bsn_t_lc = bsn_lc,
+         bsn_t_uc = bsn_uc,
+         bsn_t_lp = bsn_lp,
+         bsn_t_up = bsn_up) %>% 
+  # no imputation, ignoring missing values (bts_n)
+  mutate(bts = bts_n) %>% 
+  group_by(country, geo, edu, age) %>% 
+  do(pred_births(chunk = .)) %>% 
+  ungroup() %>% 
+  rename(bsn_n = bsn,
+         bsn_n_lc = bsn_lc,
+         bsn_n_uc = bsn_uc,
+         bsn_n_lp = bsn_lp,
+         bsn_m_up = bsn_up) %>% 
+  select(-bts)
+
+# saving outputs
+write_rds(dt5, "data_inter/db_monthly_bra_col_mex_ea.RDS")
+
+# loading outputs
+dt5 <- read_rds("data_inter/db_monthly_bra_col_mex_ea.RDS")
+
+
+dt5 %>% 
+  filter(geo == "total",
+         age == "total") %>% 
+  ggplot()+
+  geom_line(aes(date, bts_i, linetype = edu, group = edu), 
+            col = "black")+
+  geom_ribbon(aes(date, ymin = bsn_i_lp, ymax = bsn_i_up, group = edu), fill = "red", alpha = 0.2)+
+  geom_line(aes(date, bsn_i, linetype = edu), col = "red")+
+  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
+             linetype = "dashed")+
+  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
+               date_labels = "%Y")+
+  facet_wrap(~country, scales = "free_y")+
+  theme_bw()
+
+ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
+       w = 10,
+       h = 5)
+
+
+dt5 %>% 
+  filter(geo == "total",
+         age == "total") %>% 
+  ggplot()+
+  geom_line(aes(date, bts_i, linetype = edu, group = edu), 
+            col = "black")+
+  geom_ribbon(aes(date, ymin = bsn_i_lp, ymax = bsn_i_up, group = edu), fill = "red", alpha = 0.2)+
+  geom_line(aes(date, bsn_i, linetype = edu), col = "red")+
+  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
+             linetype = "dashed")+
+  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
+               date_labels = "%Y")+
+  facet_wrap(~country, scales = "free_y")+
+  theme_bw()
+
+
+
