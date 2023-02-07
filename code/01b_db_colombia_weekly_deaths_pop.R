@@ -5,6 +5,11 @@ col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-22-20
                  skip = 11,
                  col_types = rep("text", 15))
 
+col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-43-2022.xlsx",
+                 sheet = 2,
+                 skip = 11,
+                 col_types = rep("text", 15))
+
 pop_05_17 <- 
   read_xlsx("data_input/colombia/anexo-area-sexo-edad-proyecciones-poblacion-departamental_2005-2017.xlsx",
             skip = 11)
