@@ -1,0 +1,202 @@
+library(tidyverse)
+library(lubridate)
+library(mgcv)
+remove(list=ls())
+
+db <- 
+  read_rds("data_inter/db_monthly_bra_col_mex.RDS") %>% 
+  as_tibble()
+
+# typeof(db)
+
+nal <- 
+  db %>% 
+  group_by(ctr_reg, date, trim, raw_yearbir, raw_trimest, raw_mothag6, raw_edumo04) %>% 
+  summarise(raw_nbirth.current = sum(raw_nbirth.current)) %>% 
+  ungroup() %>% 
+  arrange(date, ctr_reg, raw_mothag6, raw_edumo04)
+
+nal_all_ages <- 
+  db2 %>% 
+  mutate(ctr_reg = str_sub(ctr_reg, 1, 3)) %>% 
+  group_by(ctr_reg, date, trim, raw_yearbir, raw_trimest, raw_edumo04) %>% 
+  summarise(raw_nbirth.current = sum(raw_nbirth.current)) %>% 
+  ungroup() %>% 
+  mutate(raw_mothag6 = "All") %>% 
+  arrange(date, ctr_reg, raw_mothag6, raw_edumo04)
+
+db3 <- 
+  db2 %>% 
+  bind_rows(nal, nal_all_ages) %>% 
+  filter(date >= "2015-01-01" & date <= "2021-12-31") %>% 
+  arrange(ctr_reg, raw_mothag6, raw_edumo04, date) %>% 
+  group_by(ctr_reg, raw_mothag6, raw_edumo04) %>% 
+  mutate(t = 1:n()) %>% 
+  ungroup() %>% 
+  mutate(w = ifelse(raw_yearbir %in% 2015:2019 | 
+                      (raw_yearbir == 2020 & raw_trimest == "First"), 1, 0),
+         # increasing births in one to avoid 0s
+         raw_nbirth.current = raw_nbirth.current + 1,
+         # trimester dummies for the glm model
+         trim_1 = ifelse(raw_trimest == "First", 1, 0),
+         trim_2 = ifelse(raw_trimest == "Second", 1, 0),
+         trim_3 = ifelse(raw_trimest == "Third", 1, 0),
+         trim_4 = ifelse(raw_trimest == "Fourth", 1, 0)) %>% 
+  filter(date <= "2021-12-31")
+
+
+# testing that all combinations have complete data series
+test <- 
+  db3 %>% 
+  group_by(ctr_reg, raw_mothag6, raw_edumo04) %>% 
+  summarise(obs = n())
+
+
+# function for glm model
+pred_births <- function(chunk){
+
+  model_glm <- 
+    glm(raw_nbirth.current ~ t + trim_1 + trim_2 + trim_3 + trim_4, 
+        weights = w,
+        data = chunk, 
+        family = quasipoisson(link = "log"))  
+  
+  pred <- predict(model_glm, 
+                  type = "response", 
+                  se.fit = T,
+                  newdata = chunk)
+  chunk %>% 
+    mutate(pred_glm = pred$fit,
+           pred_glm_ll = pred_glm - 1.96*pred$se.fit,
+           pred_glm_ul = pred_glm + 1.96*pred$se.fit)
+}
+
+# births baseline estimation
+db4 <- 
+  db3 %>% 
+  group_by(ctr_reg, raw_mothag6, raw_edumo04) %>% 
+  do(pred_births(chunk = .)) %>% 
+  ungroup()
+
+
+# visualiza example
+ct <- "COL-Bogota D.C."
+ag <- "20-24"
+ed <- "Prima-"
+
+db4 %>% 
+  filter(ctr_reg == ct,
+         raw_mothag6 == ag, 
+         raw_edumo04 == ed,
+         date >= "2015-01-01") %>%
+  ggplot()+
+  geom_line(aes(date, raw_nbirth.current), col = "black")+
+  geom_line(aes(date, pred_glm), col = "red", alpha = 0.6)+
+  geom_ribbon(aes(date, ymin = pred_glm_ll, ymax = pred_glm_ul), fill = "red", alpha = 0.2)+
+  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
+             linetype = "dashed")+
+  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2021-01-01'), by = '1 year'),
+               date_labels = "%Y")+
+  theme_bw()
+  
+# tibble with estimates to combine with original data
+out <- 
+  db4 %>% 
+  mutate(ISO_Code = str_sub(ctr_reg, 1, 3),
+         Region = str_sub(ctr_reg, 5, length(ctr_reg)),
+         Region = ifelse(Region == "", "All", Region),
+         pred_glm = ifelse(date < "2015-01-01", NA, pred_glm),
+         pred_glm_ll = ifelse(date < "2015-01-01", NA, pred_glm_ll),
+         pred_glm_ul = ifelse(date < "2015-01-01", NA, pred_glm_ul),
+         # decreasing again births in 1 to reverse the initial trick, and also 
+         # in the baseline
+         pred_glm = ifelse(pred_glm <= 1, 0, pred_glm - 1),
+         pred_glm_ll = ifelse(pred_glm_ll <= 1, 0, pred_glm_ll - 1),
+         pred_glm_ul = ifelse(pred_glm_ul <= 1, 0, pred_glm_ul - 1),
+         raw_nbirth.current = raw_nbirth.current - 1) %>% 
+  select(ISO_Code, Region, raw_yearbir, raw_trimest, date, raw_edumo04, raw_mothag6,
+         raw_nbirth.current,
+         pred_glm, pred_glm_ll, pred_glm_ul)
+  
+options(tibble.width = Inf)
+
+# merging estimates in original data
+db_out <- 
+  db %>% 
+  inner_join(out %>% 
+               select(-raw_nbirth.current, -date))
+
+# saving outputs
+write_rds(db_out, "data_inter/db_trimester_bra_col_ea.RDS")
+
+# 
+
+
+out %>% 
+  filter(Region == "All",
+         raw_mothag6 == "All") %>% 
+  ggplot()+
+  geom_line(aes(date, raw_nbirth.current, linetype = raw_edumo04, group = raw_edumo04), 
+            col = "black")+
+  geom_ribbon(aes(date, ymin = pred_glm_ll, ymax = pred_glm_ul, group = raw_edumo04), fill = "red", alpha = 0.2)+
+  geom_line(aes(date, pred_glm, linetype = raw_edumo04), col = "red")+
+  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
+             linetype = "dashed")+
+  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
+               date_labels = "%Y")+
+  facet_wrap(~ISO_Code, scales = "free_y")+
+  theme_bw()
+
+ggsave("figures/births_baseline_national_levels_all_ages.png",
+       w = 10,
+       h = 5)
+
+
+# table for sample description
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+test <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown")
+
+avs1519 <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2015:2019,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_bts_1519 = round(mean(raw_nbirth.current), 1)) %>% 
+  ungroup()
+
+avs2021 <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_bts_2021 = round(mean(raw_nbirth.current), 1)) %>% 
+  ungroup()
+
+preds <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_prd = round(mean(pred_glm), 1))
+
+pscs <- 
+  db_out %>% 
+  filter(raw_yearbir %in% 2020:2021,
+         raw_mothag6 != "unknown") %>% 
+  mutate(psc = raw_nbirth.current / pred_glm) %>% 
+  group_by(raw_country, Region) %>% 
+  summarise(av_psc = round(mean(psc), 2))
+
+
+
+tb1 <- 
+  avs1519 %>% 
+  left_join(preds) %>% 
+  left_join(avs2021) %>% 
+  left_join(pscs) %>% 
+  mutate(test = av_bts_2021 / av_prd)
+
