@@ -17,10 +17,12 @@ reg_amazon <- c("Amazonas",
                 "Guaviare",
                 "Putumayo",
                 "Vaupés")
+
 reg_orinoq <- c("Arauca", 
                 "Casanare", 
                 "Meta", 
                 "Vichada")
+
 reg_ejecaf <- c("Caldas", 
                 "Risaralda", 
                 "Quindío")
@@ -185,6 +187,7 @@ dt5 <-
 
 unique(dt5$edu)
 unique(dt5$age)
+unique(dt5$geo)
 
 # ~~~~~~~~~~~~~~~
 # master database
@@ -463,3 +466,13 @@ dt7 %>%
 ggsave("figures/births_monthly_baseline_national_levels_all_educ.png",
        w = 10,
        h = 5)
+
+
+
+dt6 %>% 
+  filter(country == "MEX",
+         geo == "total",
+         edu != "total",
+         age != "total") %>% 
+  group_by(year) %>% 
+  summarise(bts = sum(bts_n))
