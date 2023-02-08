@@ -12,13 +12,22 @@ mex_dts_pop2 <-
   group_by(div) %>% 
   mutate(t = 1:n(),
          w = ifelse(date <= "2020-03-15", 1, 0)) %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(isoweek = paste0(str_sub(isoweek, 1,8), "-7"),
+         date = ISOweek2date(isoweek),
+         year = year(date))
 
 mex_bsn <- 
   mex_dts_pop2 %>% 
   group_by(div) %>% 
   do(est_baseline(db = .data)) %>% 
   ungroup()
+
+
+
+
+
+
 
 write_rds(mex_bsn, "data_inter/mexico_baseline_weekly_2015_2021.rds")
 mex_bsn <- read_rds("data_inter/mexico_baseline_weekly_2015_2021.rds")
@@ -62,7 +71,7 @@ ggsave("figures/mexico_baseline_weekly_deaths_by_state.pdf",
 # ~~~~~~~~~~~~~~~~~~~~~
 mex_exc <- 
   mex_bsn %>% 
-  filter(year >= 2020) %>% 
+  filter(year(date) >= 2020) %>% 
   select(div, date, isoweek, dts, bsn, exposure) %>% 
   mutate(excess = dts / bsn,
          pscore = dts / bsn)

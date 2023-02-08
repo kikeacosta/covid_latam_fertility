@@ -1,4 +1,4 @@
-country,div,code
+country,geo,code
 Brazil,Acre,BR-AC
 Brazil,Alagoas,BR-AL
 Brazil,Total,BR
@@ -60,6 +60,9 @@ Colombia,Tolima,CO-TOL
 Colombia,Valle,CO-VAC
 Colombia,Vaupes,CO-VAU
 Colombia,Vichada,CO-VID
+Colombia,Amazonia,CO-AMZ
+Colombia,Eje Cafetero,CO-EJE
+Colombia,Orinoquia,CO-ORQ
 Colombia,Total,CO
 Mexico,Aguascalientes,MX-AGU
 Mexico,Baja California,MX-BCN

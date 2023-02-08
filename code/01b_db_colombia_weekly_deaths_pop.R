@@ -1,9 +1,9 @@
 source("Code/00_functions.R")
 
-col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-22-2022.xlsx",
-                 sheet = 2,
-                 skip = 11,
-                 col_types = rep("text", 15))
+# col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-22-2022.xlsx",
+#                  sheet = 2,
+#                  skip = 11,
+#                  col_types = rep("text", 15))
 
 col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-43-2022.xlsx",
                  sheet = 2,
@@ -22,7 +22,7 @@ pop_18_50 <-
 col2 <- 
   col %>% 
   rename(year = 1,
-         dpto = 2,
+         geo = 2,
          week = 3,
          t_nat = 4,
          m_nat = 5,
@@ -37,9 +37,9 @@ col2 <-
          f_ees = 14,
          u_ees = 15) %>% 
   fill(year) %>% 
-  fill(dpto) %>% 
+  fill(geo) %>% 
   drop_na(week) %>% 
-  gather(-year, -dpto, -week, key = type, value = dts) %>% 
+  gather(-year, -geo, -week, key = type, value = dts) %>% 
   separate(type, c("sex", "cause"), sep = "_") %>% 
   filter(week != "Total") %>% 
   mutate(year = str_replace(year, "pr", ""),
@@ -48,17 +48,17 @@ col2 <-
          week = week %>% as.double(),
          dts = dts %>% as.double()) %>% 
   filter(sex == "t") %>% 
-  group_by(year, week, dpto) %>% 
+  group_by(year, week, geo) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
   
 unique(col2$year)
-unique(col2$dpto)
+unique(col2$geo)
 unique(col2$week)
 
 col_sum <- 
   col2 %>% 
-  group_by(dpto, year) %>% 
+  group_by(geo, year) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
 
@@ -68,7 +68,7 @@ chunk <-
          week == 1)
 
 # re-scaling regions
-dist_unk_dpto <- 
+dist_unk_geo <- 
   function(chunk){
     tot <- 
       chunk %>% 
@@ -76,14 +76,14 @@ dist_unk_dpto <-
       pull(dts)
     
     chunk %>% 
-      filter(!dpto %in% c("Sin información", "Extranjero")) %>% 
+      filter(!geo %in% c("Sin información", "Extranjero")) %>% 
       mutate(dts = tot * dts/sum(dts))
   }
 
 col3 <- 
   col2 %>% 
   group_by(year, week) %>% 
-  do(dist_unk_dpto(chunk = .data)) %>% 
+  do(dist_unk_geo(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
          date = ISOweek2date(isoweek))
@@ -93,37 +93,37 @@ tot_nal <-
   group_by(year, week, date, isoweek) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup() %>% 
-  mutate(dpto = "Total")
+  mutate(geo = "Total")
 
 col4 <- 
   bind_rows(col3, tot_nal)
 
 
 col4 %>% 
-  filter(dpto == "Total") %>% 
+  filter(geo == "Total") %>% 
   ggplot()+
   geom_line(aes(date, dts))
 
 col4 %>% 
-  filter(dpto == "Bogotá") %>% 
+  filter(geo == "Bogotá") %>% 
   ggplot()+
   geom_line(aes(date, dts))
 
-unique(col4$dpto) %>% sort
+unique(col4$geo) %>% sort
 
 # population
 # ~~~~~~~~~~
 
 pop_05_17_2 <- 
   pop_05_17 %>% 
-  rename(dpto = 2,
+  rename(geo = 2,
          year = 3,
          area = 4) %>% 
   filter(area == "Total")
 
 pop_18_50_2 <- 
   pop_18_50 %>% 
-  rename(dpto = 2,
+  rename(geo = 2,
          year = 3,
          area = 4) %>% 
   filter(area == "Total") %>% 
@@ -133,10 +133,10 @@ pop <-
   bind_rows(pop_05_17_2,
             pop_18_50_2) %>% 
   select(-area) %>% 
-  gather(-DP, -dpto, -year, key = sex_age, value = pop) %>% 
+  gather(-DP, -geo, -year, key = sex_age, value = pop) %>% 
   filter(!sex_age %in% c("Total Hombres", "Total Mujeres", "Total")) %>% 
   separate(sex_age, c("sex", "age"), sep = "_") %>% 
-  mutate(dpto = recode(dpto,
+  mutate(geo = recode(geo,
                        "Archipiélago de San Andrés, Providencia y Santa Catalina" = "San Andrés y Providencia",
                        "Archipiélago de San Andrés" = "San Andrés y Providencia",
                        "Bogotá, D.C." = "Bogotá",
@@ -145,22 +145,22 @@ pop <-
 pop_all <- 
   pop %>% 
   filter(sex == "Total") %>% 
-  group_by(dpto, year) %>% 
+  group_by(geo, year) %>% 
   summarise(pop = sum(pop)) %>% 
   ungroup() %>% 
   mutate(week = 26)
 
-dptos <- unique(pop$dpto) %>% sort
+geos <- unique(pop$geo) %>% sort
 
 pop_interpol <- 
-  expand_grid(year = 2014:2022, week = 1:52, dpto = dptos) %>% 
-  bind_rows(expand_grid(year = c(2015, 2020), week = 53, dpto = dptos)) %>% 
-  arrange(dpto, year, week) %>% 
+  expand_grid(year = 2014:2022, week = 1:52, geo = geos) %>% 
+  bind_rows(expand_grid(year = c(2015, 2020), week = 53, geo = geos)) %>% 
+  arrange(geo, year, week) %>% 
   left_join(pop_all) %>% 
-  group_by(dpto) %>% 
+  group_by(geo) %>% 
   mutate(t = 1:n()) %>% 
   ungroup() %>% 
-  group_by(dpto) %>% 
+  group_by(geo) %>% 
   do(interpop(db = .data)) %>% 
   ungroup()
 
@@ -168,7 +168,7 @@ pop_interpol <-
 # ~~~~~~~~~~~~~~~~~
 
 pop_interpol %>% 
-  filter(dpto == "Bogotá") %>% 
+  filter(geo == "Bogotá") %>% 
   ggplot()+
   geom_line(aes(t, pop2))+
   geom_point(aes(t, pop), col = "red")
@@ -184,11 +184,45 @@ pop_interpol3 <-
   group_by(year, week) %>% 
   summarise(pop = sum(pop)) %>% 
   ungroup() %>% 
-  mutate(dpto = "Total") %>% 
+  mutate(geo = "Total") %>% 
   bind_rows(pop_interpol2)
 
+
+# grouping together regions in Colombia
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+reg_amazon <- c("Amazonas",
+                "Caquetá",
+                "Guainía",
+                "Guaviare",
+                "Putumayo",
+                "Vaupés")
+
+reg_orinoq <- c("Arauca", 
+                "Casanare", 
+                "Meta", 
+                "Vichada")
+
+reg_ejecaf <- c("Caldas", 
+                "Risaralda", 
+                "Quindío")
+
+# excluding San Andres y Providencia
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+exc <- c("San Andrés y Providencia")
+
+# putting together weekly deaths and populations
 col_dts_pop <- 
   col4 %>% 
-  left_join(pop_interpol3)
+  left_join(pop_interpol3) %>% 
+  mutate(geo = case_when(geo %in% reg_amazon ~ "Amazonía",
+                         geo %in% reg_orinoq ~ "Orinoquía",
+                         geo %in% reg_ejecaf ~ "Eje Cafetero",
+                         TRUE ~ geo)) %>% 
+  filter(!(geo %in% exc)) %>% 
+  group_by(year, week, geo, isoweek, date) %>% 
+  summarise(dts = sum(dts),
+            pop = sum(pop)) %>% 
+  ungroup()
 
 write_rds(col_dts_pop, "data_inter/colombia_deaths_population_2015_2021.rds")
+

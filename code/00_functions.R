@@ -9,6 +9,8 @@
 Sys.setenv(LANG = "en")
 Sys.setlocale("LC_ALL","English")
 
+set.seed(1234)
+options(scipen=999)
 
 # Installing missing packages
 # ===========================

@@ -8,13 +8,6 @@ library(ISOweek)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 des <- read_rds("data_input/mexico/mexico_region_codes.rds")
 
-# des <- 
-#   des %>% 
-#   mutate(region = ifelse(region == "Coahuila de Zaragoza",
-#                          "Coahuila",
-#                          region))
-# 
-# write_rds(des, "data_input/mexico/mexico_region_codes.rds")
 y <- 14
 wk_dts <- tibble()
 for(y in 14:21){
@@ -58,7 +51,7 @@ wk_dts3 <-
               summarise(dts = sum(dts)) %>% 
               ungroup() %>% 
               mutate(region = "Total")) %>% 
-  mutate(isoweek = paste0(isoweek, "-1"),
+  mutate(isoweek = paste0(isoweek, "-7"),
          date = ISOweek2date(isoweek)) %>% 
   rename(div = region)
 
@@ -136,7 +129,7 @@ pop_interpol <-
   group_by(div) %>% 
   do(interpop(db = .data)) %>% 
   ungroup() %>% 
-  mutate(isoweek = paste0(year, "-W", sprintf("%02d",week), "-1"),
+  mutate(isoweek = paste0(year, "-W", sprintf("%02d",week), "-7"),
          date = ISOweek2date(isoweek))
   
 pop_interpol %>%

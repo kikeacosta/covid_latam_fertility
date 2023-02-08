@@ -16,21 +16,21 @@ db2 <-
 
 dts <- 
   db2 %>%
-  select(country, div, code, ini_month, dts_mth_i, dts_mth_lag) %>% 
+  select(country, geo, code, ini_month, dts_mth_i, dts_mth_lag) %>% 
   gather(dts_mth_i, dts_mth_lag, key = per, value = dts) %>% 
   mutate(date = case_when(per == "dts_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, code, date) %>% 
+  group_by(country, geo, code, date) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
 
 bsn <- 
   db2 %>% 
-  select(country, div, code, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
+  select(country, geo, code, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
   gather(bsn_mth_i, bsn_mth_lag, key = per, value = bsn) %>% 
   mutate(date = case_when(per == "bsn_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, div, code, date) %>% 
+  group_by(country, geo, code, date) %>% 
   summarise(bsn = sum(bsn)) %>% 
   ungroup()
 
@@ -39,13 +39,13 @@ db3 <-
   mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
   filter(date >= "2020-01-01" & date <= "2021-12-31",
-         div != "Total") %>% 
+         geo != "Total") %>% 
   mutate(pscore = dts / bsn)
 
 db4 <- 
   db3 %>% 
   mutate(dts_exc_pos = ifelse(dts > bsn, dts - bsn, 0)) %>% 
-  group_by(country, div, code) %>% 
+  group_by(country, geo, code) %>% 
   mutate(cum_bsn = cumsum(bsn),
          cum_dts_exc_pos = cumsum(dts_exc_pos),
          cum_avg_pscore = cumsum(pscore) / seq_along(pscore)) %>% 
@@ -53,17 +53,17 @@ db4 <-
   mutate(cum_pscore = (cum_bsn + cum_dts_exc_pos) / cum_bsn)
 
 db4 %>% 
-  mutate(country_div = paste0(country, "_", div)) %>% 
+  mutate(country_geo = paste0(country, "_", geo)) %>% 
   ggplot()+
-  geom_point(aes(cum_pscore, country_div, col = date))+
+  geom_point(aes(cum_pscore, country_geo, col = date))+
   geom_vline(xintercept = 1, linetype = "dashed")+
   scale_x_log10()+
   theme_bw()
 
 db4 %>% 
-  mutate(country_div = paste0(country, "_", div)) %>% 
+  mutate(country_geo = paste0(country, "_", geo)) %>% 
   ggplot()+
-  geom_point(aes(cum_avg_pscore, country_div, col = date))+
+  geom_point(aes(cum_avg_pscore, country_geo, col = date))+
   geom_vline(xintercept = 1, linetype = "dashed")+
   scale_x_log10()+
   theme_bw()
@@ -88,7 +88,7 @@ db5 <-
                                               "Apr-Jun\n2021",
                                               "Jul-Sep\n2021",
                                               "Oct-Dec\n2021"))) %>% 
-  group_by(country, div, code, year, trimstr) %>% 
+  group_by(country, geo, code, year, trimstr) %>% 
   summarise(cum_pscore = mean(cum_pscore),
             cum_avg_pscore = mean(cum_avg_pscore)) %>% 
   ungroup() 

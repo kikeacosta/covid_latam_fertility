@@ -8,15 +8,15 @@ last_date <- "2020-03-15"
 col_dts_pop2 <- 
   col_dts_pop %>% 
   mutate(exposure = pop / 52) %>% 
-  arrange(dpto, date) %>% 
-  group_by(dpto) %>% 
+  arrange(geo, date) %>% 
+  group_by(geo) %>% 
   mutate(t = 1:n(),
          w = ifelse(date <= "2020-03-15", 1, 0)) %>% 
   ungroup()
 
 col_bsn <- 
   col_dts_pop2 %>% 
-  group_by(dpto) %>% 
+  group_by(geo) %>% 
   do(est_baseline(db = .data)) %>% 
   ungroup()
 
@@ -35,10 +35,10 @@ col_bsn %>%
   geom_vline(xintercept = ymd("2020-02-15"), linetype = "dashed", 
              col = "#06d6a0",
              alpha = 0.5,
-             size = 0.3)+
+             linewidth = 0.3)+
   scale_color_manual(values = c("#073b4c", "#ef476f"))+
   scale_x_date(date_breaks = "1 year", date_labels = "%Y")+
-  facet_wrap(~ dpto, scales = "free", ncol = 1)+
+  facet_wrap(~ geo, scales = "free", ncol = 1)+
   theme_bw()+
   theme(
     legend.position = "none",
@@ -63,7 +63,7 @@ ggsave(here("figures", "colombia_baseline_weekly_deaths_by_state.pdf"),
 col_exc <- 
   col_bsn %>% 
   filter(year >= 2020) %>% 
-  select(dpto, date, isoweek, dts, bsn, exposure) %>% 
+  select(geo, date, isoweek, dts, bsn, exposure) %>% 
   mutate(excess = dts / bsn,
          pscore = dts / bsn)
 
