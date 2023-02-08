@@ -9,4 +9,21 @@ dts2 <-
                              country == "Colombia" ~ "COL",
                              country == "Mexico" ~ "MEX"))
 
+bts2 <- 
+  bts %>% 
+  mutate(year = year %>% as.integer()) %>% 
+  filter(date >= "2020-01-01") %>% 
+  mutate(psc_bts_n = bts_n / bsn_n,
+         psc_bts_i = bts_i / bsn_i,
+         psc_bts_t = bts_t / bsn_t)
+
+dts_bts <- 
+  bts2 %>% 
+  left_join(dts2)
+
+# saving outputs
+write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
+
+
+
 

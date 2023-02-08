@@ -155,7 +155,8 @@ db3 <-
   left_join(pop) %>% 
   filter(date >= "2020-01-01" & date <= "2021-12-31",
          geo != "Total") %>% 
-  mutate(pscore = dts / bsn)
+  mutate(pscore = dts / bsn,
+         date = date + days(14))
 
 # identifying regions with the highest average excess mortality
 
