@@ -209,6 +209,7 @@ reg_ejecaf <- c("Caldas",
 # excluding San Andres y Providencia
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 exc <- c("San Andrés y Providencia")
+exc <- c()
 
 # putting together weekly deaths and populations
 col_dts_pop <- 

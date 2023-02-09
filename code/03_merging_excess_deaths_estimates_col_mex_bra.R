@@ -1,6 +1,11 @@
 rm(list=ls())
 source("Code/00_functions.R")
 codes <- read_csv("data_input/iso_codes.csv")
+codes <- 
+  read_xlsx("data_input/codes_depto_states.xlsx") %>% 
+  rename(country = ISO_Code) %>% 
+  select(country, geo_std_gr, geo_iso) %>% 
+  unique()
 
 # ~~~~~~~~
 # Colombia
@@ -10,7 +15,7 @@ col_bsn <- read_rds("data_inter/colombia_baseline_weekly_2015_2021.rds")
 col_bsn2 <- 
   col_bsn %>% 
   mutate(excess = dts - bsn,
-         country = "Colombia",
+         country = "COL",
          geo = recode(geo,
                       "Amazonía" = "Amazonia",
                       "Orinoquía" = "Orinoquia",
@@ -30,10 +35,9 @@ col_bsn2 <-
                       "Total" = "Total",
                       "Valle del Cauca" = "Valle",
                       "Vaupés" = "Vaupes")) %>% 
-  select(country, geo, date, isoweek, dts, bsn, ll, ul, exposure) %>% 
-  left_join(codes) 
+  select(country, geo_std_gr = geo, date, isoweek, dts, bsn, ll, ul, exposure, p_score)
 
-unique(col_bsn2$geo)
+unique(col_bsn2$geo_std_gr)
 # ~~~~~~
 # Brazil
 # ~~~~~~
@@ -42,13 +46,15 @@ bra_bsn <- read_rds("data_inter/brazil_baseline_weekly_2015_2021.rds")
 bra_bsn2 <- 
   bra_bsn %>% 
   rename(geo = state) %>% 
-  mutate(country = "Brazil",
+  mutate(country = "BRA",
          isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
          geo = str_trim(geo),
          code = ifelse(geo == "Total", state_iso, paste0("BR-", state_iso))) %>% 
-  select(country, code, date, isoweek, dts, bsn, ll, ul, exposure) %>% 
-  left_join(codes) 
+  select(country, geo_iso = code, date, isoweek, dts, bsn, ll, ul, exposure, p_score) %>% 
+  left_join(codes) %>% 
+  select(country, geo_std_gr, date, isoweek, dts, bsn, ll, ul, exposure, p_score)
 
+unique(bra_bsn2$geo_std_gr)
 
 
 # ~~~~~~
@@ -59,10 +65,10 @@ mex_bsn <- read_rds("data_inter/mexico_baseline_weekly_2015_2021.rds")
 mex_bsn2 <- 
   mex_bsn %>% 
   rename(geo = div) %>% 
-  mutate(country = "Mexico") %>% 
-  left_join(codes) %>% 
-  select(country, code, geo, date, isoweek, dts, bsn, ll, ul, exposure)
+  mutate(country = "MEX") %>% 
+  select(country, geo_std_gr = geo, date, isoweek, dts, bsn, ll, ul, exposure, p_score)
 
+unique(mex_bsn2$geo_std_gr)
 
 # ~~~~~~~~~~~~~~~~~~~~
 # putting all together
@@ -76,7 +82,8 @@ all <-
          date <= "2021-12-31") %>%
   mutate(bsn = ifelse(bsn > dts, dts, bsn),
          exc = dts - bsn,
-         psc = dts / bsn) 
+         psc = dts / bsn) %>% 
+  rename(geo = geo_std_gr)
 
 
 write_rds(all, "data_inter/db_weekly_excess_deaths_bra_col_mex.rds")
@@ -121,21 +128,21 @@ test <-
 
 dts <- 
   db2 %>%
-  select(country, geo, code, ini_month, dts_mth_i, dts_mth_lag) %>% 
+  select(country, geo, ini_month, dts_mth_i, dts_mth_lag) %>% 
   gather(dts_mth_i, dts_mth_lag, key = per, value = dts) %>% 
   mutate(date = case_when(per == "dts_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, geo, code, date) %>% 
+  group_by(country, geo, date) %>% 
   summarise(dts = sum(dts)) %>% 
   ungroup()
 
 bsn <- 
   db2 %>% 
-  select(country, geo, code, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
+  select(country, geo, ini_month, bsn_mth_i, bsn_mth_lag) %>% 
   gather(bsn_mth_i, bsn_mth_lag, key = per, value = bsn) %>% 
   mutate(date = case_when(per == "bsn_mth_i" ~ ini_month,
                           TRUE ~ ini_month - months(1))) %>% 
-  group_by(country, geo, code, date) %>% 
+  group_by(country, geo, date) %>% 
   summarise(bsn = sum(bsn)) %>% 
   ungroup()
 
@@ -143,8 +150,8 @@ pop <-
   all %>% 
   filter(month(date) == 6) %>% 
   mutate(year = year(date)) %>% 
-  select(country, geo, code, year, exposure) %>% 
-  group_by(country, geo, code, year) %>% 
+  select(country, geo, year, exposure) %>% 
+  group_by(country, geo, year) %>% 
   summarise(pop = mean(exposure) * 52) %>% 
   ungroup()
 
@@ -153,8 +160,7 @@ db3 <-
   mutate(year = year(date)) %>% 
   left_join(bsn) %>% 
   left_join(pop) %>% 
-  filter(date >= "2020-01-01" & date <= "2021-12-31",
-         geo != "Total") %>% 
+  filter(date >= "2020-01-01" & date <= "2021-12-31") %>% 
   mutate(pscore = dts / bsn,
          date = date + days(14))
 
@@ -163,6 +169,6 @@ db3 <-
 mth_out <- 
   db3 %>% 
   mutate(month = month(date)) %>% 
-  select(country, geo, code, date, year, month, dts, pop, bsn, pscore)
+  select(country, geo, date, year, month, dts, pop, bsn, pscore)
 
 write_rds(mth_out, "data_inter/db_monthly_excess_deaths_bra_col_mex.rds")

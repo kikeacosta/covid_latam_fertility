@@ -2,21 +2,32 @@ rm(list=ls())
 library(lubridate)
 library(tidyverse)
 library(mgcv)
+library(readxl)
+
+codes <- 
+  read_xlsx("data_input/codes_depto_states.xlsx") %>% 
+  rename(country = ISO_Code) %>% 
+  select(geo = geo_std, raw_geolev1) %>% 
+  unique()
+
 dt <- 
-  readRDS("data_inter/covid_tab_all.RDS") %>% 
-  as_tibble()
+  readRDS("data_inter/covid_tab_all.RDS") 
 
-geo_codes <- 
-  dt %>% 
-  select(raw_country, raw_geolev1, raw_geo1nam) %>% 
-  unique() %>% 
-  drop_na() %>% 
-  rename(country = raw_country, 
-         raw_geolev1 = raw_geolev1 ,
-         geo = raw_geo1nam)
+# births in MEX without state
+dt %>% 
+  filter(is.na(raw_geo1nam),
+         raw_country == "MEX",
+         raw_yearbir > 2019) %>% 
+  summarise(bts = sum(raw_nbirth))
 
-write_rds(geo_codes, "data_inter/geo_codes_bra_col_mex.rds")
+# total births in MEX
+dt %>% 
+  filter(!is.na(raw_geo1nam),
+         raw_country == "MEX",
+         raw_yearbir > 2019) %>% 
+  summarise(bts = sum(raw_nbirth))
 
+unique(dt$raw_geo1nam) %>% sort()
 # grouping regions and ages together ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -24,10 +35,14 @@ write_rds(geo_codes, "data_inter/geo_codes_bra_col_mex.rds")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 reg_amazon <- c("Amazonas",
                 "Caquetá",
+                "Caqueta",
                 "Guainía",
+                "Guainia",
+                "Guainja",
                 "Guaviare",
                 "Putumayo",
-                "Vaupés")
+                "Vaupés",
+                "Vaupes")
 
 reg_orinoq <- c("Arauca", 
                 "Casanare", 
@@ -36,13 +51,18 @@ reg_orinoq <- c("Arauca",
 
 reg_ejecaf <- c("Caldas", 
                 "Risaralda", 
-                "Quindío")
+                "Quindío",
+                "Quindio")
 
 dt2 <- 
   dt %>% 
   as_tibble() %>% 
+  # drop NA states in Mexico
+  drop_na(raw_geo1nam) %>% 
+  mutate(raw_geolev1 = raw_geolev1 %>% as.double()) %>% 
+  left_join(codes) %>% 
   select(country = raw_country, 
-         geo = raw_geo1nam,
+         geo,
          year = raw_yearbir, 
          mth = raw_montbir,
          age = raw_mothag7, 
@@ -53,25 +73,15 @@ dt2 <-
                                  age %in% c("30-34", "35-39") ~ "30-39",
                                  TRUE  ~ "40-54"),
          age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54")),
-         geo = case_when(country == "COL" & geo %in% reg_amazon ~ "Amazonía",
-                                 country == "COL" & geo %in% reg_orinoq ~ "Orinoquía",
+         geo = case_when(country == "COL" & geo %in% reg_amazon ~ "Amazonia",
+                                 country == "COL" & geo %in% reg_orinoq ~ "Orinoquia",
                                  country == "COL" & geo %in% reg_ejecaf ~ "Eje Cafetero",
                                  TRUE ~ geo)) %>% 
   group_by(country, geo, year, mth, age, edu) %>% 
   summarise(bts = sum(bts)) %>% 
   ungroup()
 
-unk_mx <- 
-  dt2 %>% 
-  filter(is.na(geo),
-         year > 2019) %>% 
-  summarise(bts = sum(bts))
 
-knn_mx <- 
-  dt2 %>% 
-  filter(!is.na(geo),
-         year > 2019) %>% 
-  summarise(bts = sum(bts))
 # ~~~~~~~~~~~~~~~~~~
 # imputing education
 # ~~~~~~~~~~~~~~~~~~
