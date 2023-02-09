@@ -2,6 +2,7 @@ rm(list=ls())
 source("Code/00_functions.R")
 dts <- read_rds("data_inter/db_monthly_excess_deaths_bra_col_mex.rds")
 bts <- read_rds("data_inter/db_monthly_excess_births_bra_col_mex.rds")
+cds <- read_rds("data_inter/geo_codes_bra_col_mex.rds")
 
 dts2 <- 
   dts %>% 
@@ -19,11 +20,15 @@ bts2 <-
 
 dts_bts <- 
   bts2 %>% 
-  left_join(dts2)
+  left_join(dts2) %>% 
+  left_join(cds)
 
 # saving outputs
 write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
 
 
-
+test <- 
+  dts_bts %>% 
+  filter(is.na(raw_geolev1)) %>% 
+  select(country, geo) %>% unique
 

@@ -6,6 +6,16 @@ dt <-
   readRDS("data_inter/covid_tab_all.RDS") %>% 
   as_tibble()
 
+geo_codes <- 
+  dt %>% 
+  select(raw_country, raw_geolev1, raw_geo1nam) %>% 
+  unique() %>% 
+  drop_na() %>% 
+  rename(country = raw_country, 
+         raw_geolev1 = raw_geolev1 ,
+         geo = raw_geo1nam)
+
+write_rds(geo_codes, "data_inter/geo_codes_bra_col_mex.rds")
 
 # grouping regions and ages together ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
