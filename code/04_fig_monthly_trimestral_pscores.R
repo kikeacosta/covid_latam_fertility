@@ -4,11 +4,34 @@ library(lubridate)
 library(ggrepel)
 library(ggridges)
 
-db <- read_rds("data_inter/db_monthly_excess_deaths_bra_col_mex.rds")
+db <- read_rds("data_inter/monthly_excess_deaths_bra_col_mex.rds")
+
+# excluding grouped departments from Colombia 
+
+reg_amazon <- c("Amazonas",
+                "Caqueta",
+                "Guainia",
+                "Guaviare",
+                "Putumayo",
+                "Vaupes")
+
+reg_orinoq <- c("Arauca", 
+                "Casanare", 
+                "Meta", 
+                "Vichada")
+
+reg_ejecaf <- c("Caldas", 
+                "Risaralda", 
+                "Quindio")
+
+db2 <- 
+  db %>% 
+  filter(!geo %in% c(reg_amazon, reg_orinoq, reg_ejecaf))
+
 
 av_pscores <- 
-  db %>% 
-  group_by(country, geo, code) %>% 
+  db2 %>% 
+  group_by(country, geo) %>% 
   summarise(av_pscore = mean(pscore)) %>% 
   arrange(country, -av_pscore) %>% 
   ungroup() %>% 
@@ -18,26 +41,26 @@ av_pscores <-
   ungroup() %>% 
   mutate(col_geo = paste0(geo, " (", country, ")"))
 
-db2 <- 
-  db %>% 
+db3 <- 
+  db2 %>% 
   left_join(av_pscores %>% select(-av_pscore)) %>% 
   mutate(col_geo = ifelse(is.na(col_geo), "other", col_geo),
-         ord = ifelse(col_geo == "other", "other", paste0(str_sub(code, 1, 2), ord)),
+         ord = ifelse(col_geo == "other", "other", paste0(country, ord)),
          ident = ifelse(col_geo == "other", "other", "ident"))
 
 cols <-
-  c("BR1" = "#e41a1c",
-    "BR2" = "#377eb8",
-    "BR3" = "#4daf4a",
-    "BR4" = "#984ea3",
-    "CO1" = "#e41a1c",
-    "CO2" = "#377eb8",
-    "CO3" = "#4daf4a",
-    "CO4" = "#984ea3",
-    "MX1" = "#e41a1c",
-    "MX2" = "#377eb8",
-    "MX3" = "#4daf4a",
-    "MX4" = "#984ea3",
+  c("BRA1" = "#e41a1c",
+    "BRA2" = "#377eb8",
+    "BRA3" = "#4daf4a",
+    "BRA4" = "#984ea3",
+    "COL1" = "#e41a1c",
+    "COL2" = "#377eb8",
+    "COL3" = "#4daf4a",
+    "COL4" = "#984ea3",
+    "MEX1" = "#e41a1c",
+    "MEX2" = "#377eb8",
+    "MEX3" = "#4daf4a",
+    "MEX4" = "#984ea3",
     "oth" = "black")
 
 bks <- c(paste0("BR", 1:4), paste0("CO", 1:4), paste0("MX", 1:4))
@@ -45,7 +68,7 @@ lbs <- av_pscores %>% pull(col_geo)
 
 tx <- 8
 
-db2 %>% 
+db3 %>% 
   filter(date <= "2021-12-31") %>% 
   ggplot(aes(date, pscore)) +
   geom_boxplot(aes(group = date), outlier.shape = NA, 

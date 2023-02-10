@@ -14,27 +14,7 @@ col_bsn <- read_rds("data_inter/colombia_baseline_weekly_2015_2021.rds")
 
 col_bsn2 <- 
   col_bsn %>% 
-  mutate(excess = dts - bsn,
-         country = "COL",
-         geo = recode(geo,
-                      "Amazonía" = "Amazonia",
-                      "Orinoquía" = "Orinoquia",
-                      "Atlántico" = "Atlantico",
-                      "Bogotá" = "Bogota",
-                      "Bolívar" = "Bolivar",
-                      "Boyacá" = "Boyaca",
-                      "Caquetá" = "Caqueta",
-                      "Chocó" = "Choco",
-                      "Córdoba" = "Cordoba",
-                      "Guainía" = "Guainia",
-                      "La Guajira" = "Guajira",
-                      "Nariño" = "Narino",
-                      "Norte de Santander" = "Norte Santander",
-                      "Quindío" = "Quindio",
-                      "San Andrés y Providencia" = "San Andres",
-                      "Total" = "Total",
-                      "Valle del Cauca" = "Valle",
-                      "Vaupés" = "Vaupes")) %>% 
+  mutate(excess = dts - bsn) %>% 
   select(country, geo_std_gr = geo, date, isoweek, dts, bsn, ll, ul, exposure, p_score)
 
 unique(col_bsn2$geo_std_gr)
@@ -45,11 +25,6 @@ bra_bsn <- read_rds("data_inter/brazil_baseline_weekly_2015_2021.rds")
 
 bra_bsn2 <- 
   bra_bsn %>% 
-  rename(geo = state) %>% 
-  mutate(country = "BRA",
-         isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
-         geo = str_trim(geo),
-         code = ifelse(geo == "Total", state_iso, paste0("BR-", state_iso))) %>% 
   select(country, geo_iso = code, date, isoweek, dts, bsn, ll, ul, exposure, p_score) %>% 
   left_join(codes) %>% 
   select(country, geo_std_gr, date, isoweek, dts, bsn, ll, ul, exposure, p_score)

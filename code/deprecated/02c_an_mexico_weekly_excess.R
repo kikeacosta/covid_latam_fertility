@@ -1,3 +1,4 @@
+rm(list=ls())
 source("Code/00_functions.R")
 
 mex_dts_pop <- 

@@ -1,8 +1,9 @@
-library(tidyverse)
-library(lubridate)
-library(readxl)
-library(ISOweek)
-
+# library(tidyverse)
+# library(lubridate)
+# library(readxl)
+# library(ISOweek)
+rm(list=ls())
+source("Code/00_functions.R")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # deaths by state and week ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -54,6 +55,17 @@ wk_dts3 <-
   mutate(isoweek = paste0(isoweek, "-7"),
          date = ISOweek2date(isoweek)) %>% 
   rename(div = region)
+
+write_rds(wk_dts3, "data_inter/mexico_weekly_deaths_by_state_2015_2021.rds")
+
+# ==============================================================================
+# ==============================================================================
+# ==============================================================================
+
+# loading daily deaths by state ====
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+wk_dts3 <- read_rds("data_inter/mexico_weekly_deaths_by_state_2015_2021.rds")
+
 
 # ~~~~~~~~~~~~~~~
 # population ====
@@ -151,5 +163,21 @@ dts_pop <-
   left_join(pop_int2) %>% 
   mutate(week = str_sub(isoweek, 7, 8) %>% as.integer())
 
-write_rds(dts_pop, "data_inter/mexico_deaths_population_2015_2021.rds")
+# standard codes
+codes_std <- 
+  read_csv("data_input/geo_codes_bra_col_mex.csv") %>% 
+  filter(ISO_Code == "MEX") %>% 
+  select(geo, geo_iso)
+
+mex_out <- 
+  dts_pop %>% 
+  rename(geo = div) %>% 
+  mutate(country = "MEX",
+         geo = case_when(geo == "Ciudad de Mexico" ~ "Distrito Federal",
+                         TRUE ~ geo),
+         year = str_sub(isoweek, 1, 4) %>% as.double()) %>% 
+  left_join(codes_std) %>% 
+  select(country, geo, geo_iso, date, isoweek, year, week, dts, pop)
+
+write_rds(mex_out, "data_inter/mexico_deaths_population_2015_2021.rds")
 
