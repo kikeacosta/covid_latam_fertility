@@ -26,11 +26,13 @@ pkgs <- c("tidyverse",
           "ggridges")
 
 # Install required CRAN packages if not available yet
-if(!sum(!p_isinstalled(c(pkgs)))==0) {
-  p_install(
-    package = pkgs[!p_isinstalled(pkgs)], 
-    character.only = TRUE
-  )
+if(sum(!p_isinstalled(c(pkgs)))!=0) {
+  for(i in 1:length(pkgs[!p_isinstalled(pkgs)])){
+    p_install(
+      package = pkgs[!p_isinstalled(pkgs)][i], 
+      character.only = TRUE
+    )
+  }
 }
 
 # loading required packages
