@@ -76,7 +76,7 @@ mth_out <-
 
 write_rds(mth_out, "data_inter/monthly_excess_deaths_bra_col_mex.rds")
 
-
+mth_out <- read_rds("data_inter/monthly_excess_deaths_bra_col_mex.rds")
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # cumulative p-scores ====
