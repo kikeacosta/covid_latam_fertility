@@ -57,7 +57,10 @@ dt2 <-
                                  age %in% c("20-24", "25-29") ~ "20-29",
                                  age %in% c("30-34", "35-39") ~ "30-39",
                                  TRUE  ~ "40-54"),
-         age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54")))
+         age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54"))) %>% 
+  group_by(country, geo, age, edu, year, mth) %>% 
+  summarise(bts = sum(bts)) %>% 
+  ungroup()
 
 
 # ~~~~~~~~~~~~~~~~~~
@@ -65,7 +68,7 @@ dt2 <-
 # ~~~~~~~~~~~~~~~~~~
 tot_edu <-
   dt2 %>%
-  group_by(country, year, mth, geo, age) %>%
+  group_by(country, geo, age, year, mth) %>%
   summarise(bts_tot = sum(bts, na.rm = T)) %>%
   ungroup()
 
@@ -114,7 +117,7 @@ dt4 <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # to long format, by imputation type
-dt5 <- 
+imps <- 
   dt4 %>% 
   gather(bts, bts_i, bts_t, key = imp_type, value = bts) %>% 
   mutate(imp_type = case_when(imp_type == "bts" ~ "n",
@@ -122,7 +125,19 @@ dt5 <-
                               imp_type == "bts_t" ~ "t")) %>% 
   mutate(ct_geo = paste(country, geo, sep = "_")) %>% 
   select(-country, -geo) %>% 
-  complete(ct_geo, year, mth, age, edu, imp_type, fill = list(bts = 0)) %>% 
+  arrange(ct_geo, year, mth, edu, age, imp_type) %>% 
+  mutate(year = year %>% as.integer())
+
+
+dt5 <- 
+  imps %>% 
+  complete(ct_geo = unique(imps$ct_geo),
+           year = 2015:2021, 
+           mth = 1:12, 
+           age = unique(imps$age),
+           edu = unique(imps$edu), 
+           imp_type, 
+           fill = list(bts = 0)) %>% 
   filter(!(age == "10-14" & edu == "12+")) %>% 
   separate(ct_geo, c("country", "geo"), sep = "_")
 
@@ -256,99 +271,8 @@ dt8 <-
   arrange(date) %>%
   mutate(t = 1:n()) %>%
   ungroup() %>%
-  mutate(w = ifelse(date < "2020-03-01", 1, 0))
+  mutate(w = ifelse(date < "2020-03-01", 1, 0)) %>% 
+  arrange(country, geo, date, edu, age, imp_type, date)
 
 write_rds(dt8, "data_inter/master_births_for_baseline_estimation.rds")
-
-
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-# baseline estimation ====
-# ~~~~~~~~~~~~~~~~~~~~~~~~
-
-# quick test with total national by educational level 
-test <- 
-  dt8 %>% 
-  filter(geo == "total",
-         # edu == "8-11",
-         age == "20-29") %>% 
-  group_by(country, geo, age, edu, imp_type) %>%
-  do(pred_births(chunk = .data)) %>% 
-  ungroup()
-  
-test %>% 
-  filter(geo == "total",
-         edu != "total",
-         imp_type == "i") %>% 
-  ggplot()+
-  geom_line(aes(date, bts, linetype = edu, group = edu), 
-            col = "black")+
-  geom_ribbon(aes(date, ymin = bsn_lp, ymax = bsn_up, group = edu), fill = "red", alpha = 0.2)+
-  geom_line(aes(date, bsn, linetype = edu), col = "red")+
-  geom_vline(xintercept = c(ymd("2019-12-31")), 
-             linetype = "dashed")+
-  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
-               date_labels = "%Y")+
-  facet_wrap(~country, scales = "free_y")+
-  theme_bw()
-
-ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
-       w = 10,
-       h = 5)
-
-dt9 <- 
-  dt8 %>% 
-  group_by(country, geo, age, edu, imp_type) %>%
-  do(pred_births(chunk = .data)) %>% 
-  ungroup()
-
-# saving outputs
-write_rds(dt9, "data_inter/monthly_excess_births_bra_col_mex.rds")
-
-dt9 %>% 
-  filter(geo == "total",
-         age == "total",
-         imp_type == "i") %>% 
-  ggplot()+
-  geom_line(aes(date, bts, linetype = edu, group = edu), 
-            col = "black")+
-  geom_ribbon(aes(date, ymin = bsn_lp, ymax = bsn_up, group = edu), fill = "red", alpha = 0.2)+
-  geom_line(aes(date, bsn, linetype = edu), col = "red")+
-  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
-             linetype = "dashed")+
-  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
-               date_labels = "%Y")+
-  facet_wrap(~country, scales = "free_y")+
-  theme_bw()
-
-ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
-       w = 10,
-       h = 5)
-
-
-dt9 %>% 
-  filter(geo == "total",
-         edu == "total") %>% 
-  ggplot()+
-  geom_line(aes(date, bts, linetype = age, group = age), 
-            col = "black")+
-  geom_ribbon(aes(date, ymin = bsn_lp, ymax = bsn_up, group = age), fill = "red", alpha = 0.2)+
-  geom_line(aes(date, bsn, linetype = age), col = "red")+
-  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
-             linetype = "dashed")+
-  scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
-               date_labels = "%Y")+
-  facet_wrap(~country, scales = "free_y")+
-  theme_bw()
-
-ggsave("figures/births_monthly_baseline_national_levels_all_educ.png",
-       w = 10,
-       h = 5)
-
-dt9 %>% 
-  filter(country == "MEX",
-         geo == "total",
-         edu != "total",
-         age != "total") %>% 
-  group_by(year) %>% 
-  summarise(bts = sum(bts_n))
 
