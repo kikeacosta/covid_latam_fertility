@@ -188,8 +188,6 @@ pop_interpol3 <-
   mutate(geo = "Total") %>% 
   bind_rows(pop_interpol2)
 
-
-
 # putting together weekly deaths and populations
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # standard codes
@@ -218,13 +216,12 @@ col_dts_pop <-
                       "Quindío" = "Quindio",
                       "San Andrés y Providencia" = "San Andres",
                       "Valle del Cauca" = "Valle",
-                      "Vaupés" = "Vaupes")) %>% 
-  left_join(geo_codes)
-
+                      "Vaupés" = "Vaupes")) 
 
 # grouping three regions
 # grouping together regions in Colombia
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 reg_amazon <- c("Amazonas",
                 "Caqueta",
                 "Guainia",
@@ -241,9 +238,9 @@ reg_ejecaf <- c("Caldas",
                 "Risaralda", 
                 "Quindio")
 
-reg_codes <- 
-  codes_std %>% 
-  select(geo = geo_gr, geo_iso = geo_iso_gr)
+# reg_codes <- 
+#   codes_std %>% 
+#   select(geo = geo_gr, geo_iso = geo_iso_gr)
 
 regs_dts_pop <- 
   col_dts_pop %>% 
@@ -255,12 +252,12 @@ regs_dts_pop <-
   group_by(year, week, geo, isoweek, date) %>% 
   summarise(dts = sum(dts),
             pop = sum(pop)) %>% 
-  ungroup() %>% 
-  left_join(reg_codes)
+  ungroup()
 
 col_out <- 
   bind_rows(col_dts_pop, regs_dts_pop) %>% 
-  mutate(country = "COL")
+  mutate(country = "COL") %>% 
+  left_join(geo_codes)
 
 write_rds(col_out, "data_inter/colombia_deaths_population_2015_2021.rds")
 

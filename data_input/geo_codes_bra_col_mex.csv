@@ -1,96 +1,99 @@
-ISO_Code,geo,geo_gr,raw_geoname,raw_geolev1,region_shdi,geo_map,geo_iso,geo_iso_gr,geo_label_gr,geo_label
-BRA,Acre,Acre,Acre,76012,Acre,Acre,BR-AC,BR-AC,Acre,Acre
-BRA,Alagoas,Alagoas,Alagoas,76027,Alagoas,Alagoas,BR-AL,BR-AL,Alagoas,Alagoas
-BRA,Amapa,Amapa,Amapá,76016,Amapa,Amapá,BR-AP,BR-AP,Amapá,Amapá
-BRA,Amazonas,Amazonas,Amazonas,76013,Amazonas,Amazonas,BR-AM,BR-AM,Amazonas,Amazonas
-BRA,Bahia,Bahia,Bahia,76029,Bahia,Bahia,BR-BA,BR-BA,Bahia,Bahia
-BRA,Ceara,Ceara,Ceará,76023,Ceara,Ceará,BR-CE,BR-CE,Ceará,Ceará
-BRA,Distrito Federal,Distrito Federal,Distrito Federal,76053,Distrito Federal,Distrito Federal,BR-DF,BR-DF,Distrito Federal,Distrito Federal
-BRA,Espirito Santo,Espirito Santo,Espírito Santo,76032,Espirito Santo,Espírito Santo,BR-ES,BR-ES,Espírito Santo,Espírito Santo
-BRA,Goias,Goias,Goiás,76052,Goias,Goiás,BR-GO,BR-GO,Goiás,Goiás
-BRA,Maranhao,Maranhao,Maranhão,76021,Maranhao,Maranhão,BR-MA,BR-MA,Maranhão,Maranhão
-BRA,Mato Grosso,Mato Grosso,Mato Grosso,76051,Mato Grosso,Mato Grosso,BR-MT,BR-MT,Mato Grosso,Mato Grosso
-BRA,Mato Grosso do Sul,Mato Grosso do Sul,Mato Grosso do Sul,76050,Mato Grosso do Sul,Mato Grosso do Sul,BR-MS,BR-MS,Mato Grosso do Sul,Mato Grosso do Sul
-BRA,Minas Gerais,Minas Gerais,Minas Gerais,76031,Minas Gerais,Minas Gerais,BR-MG,BR-MG,Minas Gerais,Minas Gerais
-BRA,Para,Para,Pará,76015,Para,Pará,BR-PA,BR-PA,Pará,Pará
-BRA,Paraiba,Paraiba,Paraíba,76025,Paraiba,Paraíba,BR-PB,BR-PB,Paraíba,Paraíba
-BRA,Parana,Parana,Paraná,76041,Parana,Paraná,BR-PR,BR-PR,Paraná,Paraná
-BRA,Pernambuco,Pernambuco,Pernambuco,76026,Pernambuco,Pernambuco,BR-PE,BR-PE,Pernambuco,Pernambuco
-BRA,Piaui,Piaui,Piauí,76022,Piaui,Piauí,BR-PI,BR-PI,Piauí,Piauí
-BRA,Rio de Janeiro,Rio de Janeiro,Rio de Janeiro,76033,Rio de Janeiro,Rio de Janeiro,BR-RJ,BR-RJ,Rio de Janeiro,Rio de Janeiro
-BRA,Rio Grande do Norte,Rio Grande do Norte,Rio Grande do Nort,76024,Rio Grande do Norte,Rio Grande do Norte,BR-RN,BR-RN,Rio Grande do Norte,Rio Grande do Norte
-BRA,Rio Grande do Sul,Rio Grande do Sul,Rio Grande do Sul,76043,Rio Grande do Sul,Rio Grande do Sul,BR-RS,BR-RS,Rio Grande do Sul,Rio Grande do Sul
-BRA,Rondonia,Rondonia,Rondônia,76011,Rondonia,Rondônia,BR-RO,BR-RO,Rondônia,Rondônia
-BRA,Roraima,Roraima,Roraima,76014,Roraima,Roraima,BR-RR,BR-RR,Roraima,Roraima
-BRA,Santa Catarina,Santa Catarina,Santa Catarina,76042,Santa Catarina,Santa Catarina,BR-SC,BR-SC,Santa Catarina,Santa Catarina
-BRA,Sao Paulo,Sao Paulo,São Paulo,76035,Sao Paulo,São Paulo,BR-SP,BR-SP,São Paulo,São Paulo
-BRA,Sergipe,Sergipe,Sergipe,76028,Sergipe,Sergipe,BR-SE,BR-SE,Sergipe,Sergipe
-BRA,Tocantins,Tocantins,Tocantins,76017,Tocantins,Tocantins,BR-TO,BR-TO,Tocantins,Tocantins
-BRA,Total,Total,Total,76000,Total,Total,BR,BR,Total,Total
-COL,Amazonas,Amazonia,Amazonas,170091,Amazonas,Amazonía,CO-AMA,CO-AMZ,Amazonía (region),Amazonas
-COL,Antioquia,Antioquia,Antioquia,170005,Antioquia (incl Medellin),Antioquia,CO-ANT,CO-ANT,Antioquia,Antioquia
-COL,Arauca,Orinoquia,Arauca,170081,Arauca,Arauca,CO-ARA,CO-ORI,Orinoquía (region),Arauca
-COL,Atlantico,Atlantico,Atlantico,170008,Atlantico (incl Barranquilla),Atlántico,CO-ATL,CO-ATL,Atlántico,Atlántico
-COL,Bogota,Bogota,Bogota,170011,Bogota D.C.,Bogotá D.C.,CO-DC,CO-DC,Bogotá D.C.,Bogotá D.C.
-COL,Bolivar,Bolivar,Bolivar,170013,Bolivar (Sur and Norte),Bolívar,CO-BOL,CO-BOL,Bolívar,Bolívar
-COL,Boyaca,Boyaca,Boyaca,170015,Boyaca,Boyacá,CO-BOY,CO-BOY,Boyacá,Boyacá
-COL,Caldas,Eje Cafetero,Caldas,170017,Caldas,Caldas,CO-CAL,CO-EJE,Eje Cafetero,Eje Cafetero
-COL,Caqueta,Amazonia,Caqueta,170018,Caqueta,Caqueta,CO-CAQ,CO-AMZ,Amazonía (region),Caquetá
-COL,Casanare,Orinoquia,Casanare,170085,Casanare,Casanare,CO-CAS,CO-ORI,Orinoquía (region),Casanare
-COL,Cauca,Cauca,Cauca,170019,Cauca,Cauca,CO-CAU,CO-CAU,Cauca,Cauca
-COL,Cesar,Cesar,Cesar,170020,Cesar,Cesar,CO-CES,CO-CES,Cesar,Cesar
-COL,Choco,Choco,Choco,170027,Choco,Chocó,CO-CHO,CO-CHO,Chocó,Chocó
-COL,Cordoba,Cordoba,Cordoba,170023,Cordoba,Córdoba,CO-COR,CO-COR,Córdoba,Córdoba
-COL,Cundinamarca,Cundinamarca,Cundinamarca,170025,Cundinamarca,Cundinamarca,CO-CUN,CO-CUN,Cundinamarca,Cundinamarca
-COL,Guainia,Amazonia,Guainia,170094,Guainja,Guainía,CO-GUA,CO-AMZ,Amazonía (region),Guainía
-COL,Guajira,Guajira,Guajira,170044,Guajira,La Guajira,CO-LAG,CO-LAG,La Guajira,La Guajira
-COL,Guaviare,Amazonia,Guaviare,170095,Guaviare,Guaviare,CO-GUV,CO-AMZ,Amazonía (region),Guaviare
-COL,Huila,Huila,Huila,170041,Huila,Huila,CO-HUI,CO-HUI,Huila,Huila
-COL,Magdalena,Magdalena,Magdalena,170047,Magdalena,Magdalena,CO-MAG,CO-MAG,Magdalena,Magdalena
-COL,Meta,Orinoquia,Meta,170050,Meta,Meta,CO-MET,CO-ORI,Orinoquía (region),Meta
-COL,Narino,Narino,Nariño,170052,Narino,Nariño,CO-NAR,CO-NAR,Nariño,Nariño
-COL,Norte de Santander,Norte de Santander,Norte Santander,170054,Norte de Santander,Norte de Santander,CO-NSA,CO-NSA,Norte de Santander,Norte de Santander
-COL,Putumayo,Amazonia,Putumayo,170086,Putumayo,Putumayo,CO-PUT,CO-AMZ,Amazonía (region),Putumayo
-COL,Quindio,Eje Cafetero,Quindio,170063,Quindio,Quindío,CO-QUI,CO-EJE,Eje Cafetero,Eje Cafetero
-COL,Risaralda,Eje Cafetero,Risaralda,170066,Risaralda,Risaralda,CO-RIS,CO-EJE,Eje Cafetero,Eje Cafetero
-COL,San Andres,San Andres,San Andres,170088,San Andres,San Andrés y Providencia,CO-SAP,CO-SAP,San Andrés y Providencia,San Andrés y Providencia
-COL,Santander,Santander,Santander,170068,Santander,Santander,CO-SAN,CO-SAN,Santander,Santander
-COL,Sucre,Sucre,Sucre,170070,Sucre,Sucre,CO-SUC,CO-SUC,Sucre,Sucre
-COL,Tolima,Tolima,Tolima,170073,Tolima,Tolima,CO-TOL,CO-TOL,Tolima,Tolima
-COL,Valle,Valle,Valle,170076,Valle (incl Cali),Valle del Cauca,CO-VAC,CO-VAC,Valle del Cauca,Valle del Cauca
-COL,Vaupes,Amazonia,Vaupes,170097,Vaupis,Vaupés,CO-VAU,CO-AMZ,Amazonía (region),Vaupés
-COL,Vichada,Orinoquia,Vichada,170099,Vichada,Vichada,CO-VID,CO-ORI,Orinoquía (region),Vichada
-COL,Total,Total,Total,170000,Total,Total,CO,CO,Total,Total
-MEX,Aguascalientes,Aguascalientes,Aguascalientes,484001,Aguascalientes,Aguascalientes,MX-AGU,MX-AGU,Aguascalientes,Aguascalientes
-MEX,Baja California,Baja California,Baja California,484002,Baja California,Baja California,MX-BCN,MX-BCN,Baja California,Baja California
-MEX,Baja California Sur,Baja California Sur,Baja California Sur,484003,Baja California Sur,Baja California Sur,MX-BCS,MX-BCS,Baja California Sur,Baja California Sur
-MEX,Campeche,Campeche,Campeche,484004,Campeche,Campeche,MX-CAM,MX-CAM,Campeche,Campeche
-MEX,Chiapas,Chiapas,Chiapas,484007,Chiapas,Chiapas,MX-CHP,MX-CHP,Chiapas,Chiapas
-MEX,Chihuahua,Chihuahua,Chihuahua,484008,Chihuahua,Chihuahua,MX-CHH,MX-CHH,Chihuahua,Chihuahua
-MEX,Coahuila,Coahuila,Coahuila,484005,Coahuila,Coahuila,MX-COA,MX-COA,Coahuila de Zaragoza,Coahuila de Zaragoza
-MEX,Colima,Colima,Colima,484006,Colima,Colima,MX-COL,MX-COL,Colima,Colima
-MEX,Distrito Federal,Distrito Federal,Distrito Federal,484009,Distrito Federal,Distrito Federal,MX-CMX,MX-CMX,Distrito Federal,Distrito Federal
-MEX,Durango,Durango,Durango,484010,Durango,Durango,MX-DUR,MX-DUR,Durango,Durango
-MEX,Guanajuato,Guanajuato,Guanajuato,484011,Guanajuato,Guanajuato,MX-GUA,MX-GUA,Guanajuato,Guanajuato
-MEX,Guerrero,Guerrero,Guerrero,484012,Guerrero,Guerrero,MX-GRO,MX-GRO,Guerrero,Guerrero
-MEX,Hidalgo,Hidalgo,Hidalgo,484013,Hidalgo,Hidalgo,MX-HID,MX-HID,Hidalgo,Hidalgo
-MEX,Jalisco,Jalisco,Jalisco,484014,Jalisco,Jalisco,MX-JAL,MX-JAL,Jalisco,Jalisco
-MEX,Mexico,Mexico,Mexico,484015,Mexico,México,MX-MEX,MX-MEX,México,México
-MEX,Michoacan,Michoacan,Michoacan de Ocampo,484016,Michoacan de Ocampo,Michoacán,MX-MIC,MX-MIC,Michoacán de Ocampo,Michoacán de Ocampo
-MEX,Morelos,Morelos,Morelos,484017,Morelos,Morelos,MX-MOR,MX-MOR,Morelos,Morelos
-MEX,Nayarit,Nayarit,Nayarit,484018,Nayarit,Nayarit,MX-NAY,MX-NAY,Nayarit,Nayarit
-MEX,Nuevo Leon,Nuevo Leon,Nuevo Leon,484019,Nuevo Leon,Nuevo León,MX-NLE,MX-NLE,Nuevo León,Nuevo León
-MEX,Oaxaca,Oaxaca,Oaxaca,484020,Oaxaca,Oaxaca,MX-OAX,MX-OAX,Oaxaca,Oaxaca
-MEX,Puebla,Puebla,Puebla,484021,Puebla,Puebla,MX-PUE,MX-PUE,Puebla,Puebla
-MEX,Queretaro,Queretaro,Queretaro,484022,Queretaro,Querétaro,MX-QUE,MX-QUE,Querétaro,Querétaro
-MEX,Quintana Roo,Quintana Roo,Quintana Roo,484023,Quintana Roo,Quintana Roo,MX-ROO,MX-ROO,Quintana Roo,Quintana Roo
-MEX,San Luis Potosi,San Luis Potosi,San Luis Potosi,484024,San Luis Potosi,San Luis Potosí,MX-SLP,MX-SLP,San Luis Potosí,San Luis Potosí
-MEX,Sinaloa,Sinaloa,Sinaloa,484025,Sinaloa,Sinaloa,MX-SIN,MX-SIN,Sinaloa,Sinaloa
-MEX,Sonora,Sonora,Sonora,484026,Sonora,Sonora,MX-SON,MX-SON,Sonora,Sonora
-MEX,Tabasco,Tabasco,Tabasco,484027,Tabasco,Tabasco,MX-TAB,MX-TAB,Tabasco,Tabasco
-MEX,Tamaulipas,Tamaulipas,Tamaulipas,484028,Tamaulipas,Tamaulipas,MX-TAM,MX-TAM,Tamaulipas,Tamaulipas
-MEX,Tlaxcala,Tlaxcala,Tlaxcala,484029,Tlaxcala,Tlaxcala,MX-TLA,MX-TLA,Tlaxcala,Tlaxcala
-MEX,Veracruz,Veracruz,Veracruz,484030,Veracruz,Veracruz,MX-VER,MX-VER,Veracruz,Veracruz
-MEX,Yucatan,Yucatan,Yucatan,484031,Yucatan,Yucatán,MX-YUC,MX-YUC,Yucatán,Yucatán
-MEX,Zacatecas,Zacatecas,Zacatecas,484032,Zacatecas,Zacatecas,MX-ZAC,MX-ZAC,Zacatecas,Zacatecas
-MEX,Total,Total,Total,484000,Total,Total,MX,MX,Total,Total
+ISO_Code,geo,raw_geoname,raw_geolev1,region_shdi,geo_map,geo_iso,geo_label,type
+BRA,Acre,Acre,76012,Acre,Acre,BR-AC,Acre,single
+BRA,Alagoas,Alagoas,76027,Alagoas,Alagoas,BR-AL,Alagoas,single
+BRA,Amapa,Amapá,76016,Amapa,Amapá,BR-AP,Amapá,single
+BRA,Amazonas,Amazonas,76013,Amazonas,Amazonas,BR-AM,Amazonas,single
+BRA,Bahia,Bahia,76029,Bahia,Bahia,BR-BA,Bahia,single
+BRA,Ceara,Ceará,76023,Ceara,Ceará,BR-CE,Ceará,single
+BRA,Distrito Federal,Distrito Federal,76053,Distrito Federal,Distrito Federal,BR-DF,Distrito Federal,single
+BRA,Espirito Santo,Espírito Santo,76032,Espirito Santo,Espírito Santo,BR-ES,Espírito Santo,single
+BRA,Goias,Goiás,76052,Goias,Goiás,BR-GO,Goiás,single
+BRA,Maranhao,Maranhão,76021,Maranhao,Maranhão,BR-MA,Maranhão,single
+BRA,Mato Grosso,Mato Grosso,76051,Mato Grosso,Mato Grosso,BR-MT,Mato Grosso,single
+BRA,Mato Grosso do Sul,Mato Grosso do Sul,76050,Mato Grosso do Sul,Mato Grosso do Sul,BR-MS,Mato Grosso do Sul,single
+BRA,Minas Gerais,Minas Gerais,76031,Minas Gerais,Minas Gerais,BR-MG,Minas Gerais,single
+BRA,Para,Pará,76015,Para,Pará,BR-PA,Pará,single
+BRA,Paraiba,Paraíba,76025,Paraiba,Paraíba,BR-PB,Paraíba,single
+BRA,Parana,Paraná,76041,Parana,Paraná,BR-PR,Paraná,single
+BRA,Pernambuco,Pernambuco,76026,Pernambuco,Pernambuco,BR-PE,Pernambuco,single
+BRA,Piaui,Piauí,76022,Piaui,Piauí,BR-PI,Piauí,single
+BRA,Rio de Janeiro,Rio de Janeiro,76033,Rio de Janeiro,Rio de Janeiro,BR-RJ,Rio de Janeiro,single
+BRA,Rio Grande do Norte,Rio Grande do Nort,76024,Rio Grande do Norte,Rio Grande do Norte,BR-RN,Rio Grande do Norte,single
+BRA,Rio Grande do Sul,Rio Grande do Sul,76043,Rio Grande do Sul,Rio Grande do Sul,BR-RS,Rio Grande do Sul,single
+BRA,Rondonia,Rondônia,76011,Rondonia,Rondônia,BR-RO,Rondônia,single
+BRA,Roraima,Roraima,76014,Roraima,Roraima,BR-RR,Roraima,single
+BRA,Santa Catarina,Santa Catarina,76042,Santa Catarina,Santa Catarina,BR-SC,Santa Catarina,single
+BRA,Sao Paulo,São Paulo,76035,Sao Paulo,São Paulo,BR-SP,São Paulo,single
+BRA,Sergipe,Sergipe,76028,Sergipe,Sergipe,BR-SE,Sergipe,single
+BRA,Tocantins,Tocantins,76017,Tocantins,Tocantins,BR-TO,Tocantins,single
+BRA,Total,Total,76000,Total,Total,BR,Total,single
+COL,Amazonas,Amazonas,170091,Amazonas,Amazonía,CO-AMA,Amazonas,to_group_a
+COL,Antioquia,Antioquia,170005,Antioquia (incl Medellin),Antioquia,CO-ANT,Antioquia,single
+COL,Arauca,Arauca,170081,Arauca,Arauca,CO-ARA,Arauca,to_group_o
+COL,Atlantico,Atlantico,170008,Atlantico (incl Barranquilla),Atlántico,CO-ATL,Atlántico,single
+COL,Bogota,Bogota,170011,Bogota D.C.,Bogotá D.C.,CO-DC,Bogotá D.C.,single
+COL,Bolivar,Bolivar,170013,Bolivar (Sur and Norte),Bolívar,CO-BOL,Bolívar,single
+COL,Boyaca,Boyaca,170015,Boyaca,Boyacá,CO-BOY,Boyacá,single
+COL,Caldas,Caldas,170017,Caldas,Caldas,CO-CAL,Caldas,to_group_e
+COL,Caqueta,Caqueta,170018,Caqueta,Caqueta,CO-CAQ,Caquetá,to_group_a
+COL,Casanare,Casanare,170085,Casanare,Casanare,CO-CAS,Casanare,to_group_o
+COL,Cauca,Cauca,170019,Cauca,Cauca,CO-CAU,Cauca,single
+COL,Cesar,Cesar,170020,Cesar,Cesar,CO-CES,Cesar,single
+COL,Choco,Choco,170027,Choco,Chocó,CO-CHO,Chocó,single
+COL,Cordoba,Cordoba,170023,Cordoba,Córdoba,CO-COR,Córdoba,single
+COL,Cundinamarca,Cundinamarca,170025,Cundinamarca,Cundinamarca,CO-CUN,Cundinamarca,single
+COL,Guainia,Guainia,170094,Guainja,Guainía,CO-GUA,Guainía,to_group_a
+COL,Guajira,Guajira,170044,Guajira,La Guajira,CO-LAG,La Guajira,single
+COL,Guaviare,Guaviare,170095,Guaviare,Guaviare,CO-GUV,Guaviare,to_group_a
+COL,Huila,Huila,170041,Huila,Huila,CO-HUI,Huila,single
+COL,Magdalena,Magdalena,170047,Magdalena,Magdalena,CO-MAG,Magdalena,single
+COL,Meta,Meta,170050,Meta,Meta,CO-MET,Meta,to_group_o
+COL,Narino,Nariño,170052,Narino,Nariño,CO-NAR,Nariño,single
+COL,Norte de Santander,Norte Santander,170054,Norte de Santander,Norte de Santander,CO-NSA,Norte de Santander,single
+COL,Putumayo,Putumayo,170086,Putumayo,Putumayo,CO-PUT,Putumayo,to_group_a
+COL,Quindio,Quindio,170063,Quindio,Quindío,CO-QUI,Quindío,to_group_e
+COL,Risaralda,Risaralda,170066,Risaralda,Risaralda,CO-RIS,Risaralda,to_group_e
+COL,San Andres,San Andres,170088,San Andres,San Andrés y Providencia,CO-SAP,San Andrés y Providencia,single
+COL,Santander,Santander,170068,Santander,Santander,CO-SAN,Santander,single
+COL,Sucre,Sucre,170070,Sucre,Sucre,CO-SUC,Sucre,single
+COL,Tolima,Tolima,170073,Tolima,Tolima,CO-TOL,Tolima,single
+COL,Valle,Valle,170076,Valle (incl Cali),Valle del Cauca,CO-VAC,Valle del Cauca,single
+COL,Vaupes,Vaupes,170097,Vaupis,Vaupés,CO-VAU,Vaupés,to_group_a
+COL,Vichada,Vichada,170099,Vichada,Vichada,CO-VID,Vichada,to_group_o
+COL,Orinoquia,Orinoquia,,Orinoquia,Orinoquia,CO-ORI,Orinoquía (region),group
+COL,Amazonia,Amazonia,,Amazonia,Amazonia,CO-AMZ,Amazonía (region),group
+COL,Eje Cafetero,Eje Cafetero,,Eje Cafetero,Eje Cafetero,CO-EJE,Eje Cafetero (region),group
+COL,Total,Total,170000,Total,Total,CO,Total,single
+MEX,Aguascalientes,Aguascalientes,484001,Aguascalientes,Aguascalientes,MX-AGU,Aguascalientes,single
+MEX,Baja California,Baja California,484002,Baja California,Baja California,MX-BCN,Baja California,single
+MEX,Baja California Sur,Baja California Sur,484003,Baja California Sur,Baja California Sur,MX-BCS,Baja California Sur,single
+MEX,Campeche,Campeche,484004,Campeche,Campeche,MX-CAM,Campeche,single
+MEX,Chiapas,Chiapas,484007,Chiapas,Chiapas,MX-CHP,Chiapas,single
+MEX,Chihuahua,Chihuahua,484008,Chihuahua,Chihuahua,MX-CHH,Chihuahua,single
+MEX,Coahuila,Coahuila,484005,Coahuila,Coahuila,MX-COA,Coahuila de Zaragoza,single
+MEX,Colima,Colima,484006,Colima,Colima,MX-COL,Colima,single
+MEX,Distrito Federal,Distrito Federal,484009,Distrito Federal,Distrito Federal,MX-CMX,Distrito Federal,single
+MEX,Durango,Durango,484010,Durango,Durango,MX-DUR,Durango,single
+MEX,Guanajuato,Guanajuato,484011,Guanajuato,Guanajuato,MX-GUA,Guanajuato,single
+MEX,Guerrero,Guerrero,484012,Guerrero,Guerrero,MX-GRO,Guerrero,single
+MEX,Hidalgo,Hidalgo,484013,Hidalgo,Hidalgo,MX-HID,Hidalgo,single
+MEX,Jalisco,Jalisco,484014,Jalisco,Jalisco,MX-JAL,Jalisco,single
+MEX,Mexico,Mexico,484015,Mexico,México,MX-MEX,México,single
+MEX,Michoacan,Michoacan de Ocampo,484016,Michoacan de Ocampo,Michoacán,MX-MIC,Michoacán de Ocampo,single
+MEX,Morelos,Morelos,484017,Morelos,Morelos,MX-MOR,Morelos,single
+MEX,Nayarit,Nayarit,484018,Nayarit,Nayarit,MX-NAY,Nayarit,single
+MEX,Nuevo Leon,Nuevo Leon,484019,Nuevo Leon,Nuevo León,MX-NLE,Nuevo León,single
+MEX,Oaxaca,Oaxaca,484020,Oaxaca,Oaxaca,MX-OAX,Oaxaca,single
+MEX,Puebla,Puebla,484021,Puebla,Puebla,MX-PUE,Puebla,single
+MEX,Queretaro,Queretaro,484022,Queretaro,Querétaro,MX-QUE,Querétaro,single
+MEX,Quintana Roo,Quintana Roo,484023,Quintana Roo,Quintana Roo,MX-ROO,Quintana Roo,single
+MEX,San Luis Potosi,San Luis Potosi,484024,San Luis Potosi,San Luis Potosí,MX-SLP,San Luis Potosí,single
+MEX,Sinaloa,Sinaloa,484025,Sinaloa,Sinaloa,MX-SIN,Sinaloa,single
+MEX,Sonora,Sonora,484026,Sonora,Sonora,MX-SON,Sonora,single
+MEX,Tabasco,Tabasco,484027,Tabasco,Tabasco,MX-TAB,Tabasco,single
+MEX,Tamaulipas,Tamaulipas,484028,Tamaulipas,Tamaulipas,MX-TAM,Tamaulipas,single
+MEX,Tlaxcala,Tlaxcala,484029,Tlaxcala,Tlaxcala,MX-TLA,Tlaxcala,single
+MEX,Veracruz,Veracruz,484030,Veracruz,Veracruz,MX-VER,Veracruz,single
+MEX,Yucatan,Yucatan,484031,Yucatan,Yucatán,MX-YUC,Yucatán,single
+MEX,Zacatecas,Zacatecas,484032,Zacatecas,Zacatecas,MX-ZAC,Zacatecas,single
+MEX,Total,Total,484000,Total,Total,MX,Total,single
