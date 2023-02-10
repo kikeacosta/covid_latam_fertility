@@ -41,7 +41,9 @@ bts2 <-
 geo_codes2 <- 
   geo_codes %>% 
   select(country = ISO_Code,
-         geo, raw_geolev1, region_shdi, geo_label)
+         geo, raw_geolev1, region_shdi, geo_label, geo_type = type)
+
+unique(geo_codes2$geo_type)
 
 # all together
 # ~~~~~~~~~~~~
@@ -49,7 +51,8 @@ dts_bts <-
   bts2 %>% 
   left_join(dts2) %>% 
   left_join(dts_cum2) %>% 
-  left_join(geo_codes2)
+  left_join(geo_codes2) %>% 
+  select(country, geo, geo_label, region_shdi, raw_geolev1, geo_type, everything())
 
 # saving outputs
 write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
