@@ -39,7 +39,11 @@ p_load(pkgs, character.only = TRUE)
 
 # ====
 copy_this <- function(x,row.names=FALSE,col.names=TRUE,...) {
-  write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
+  write.table(x,
+              file = paste0("clipboard-", object.size(x)),
+              sep="\t",
+              row.names=row.names,
+              col.names=col.names,...)
 }
 
 # function for weekly population interpolation 

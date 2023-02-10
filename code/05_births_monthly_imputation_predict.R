@@ -109,8 +109,7 @@ dt4 <-
   ungroup() %>% 
   droplevels()
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # reshaping to long format and completing missing dates with 0s
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -258,6 +257,8 @@ dt8 <-
   mutate(t = 1:n()) %>%
   ungroup() %>%
   mutate(w = ifelse(date < "2020-03-01", 1, 0))
+
+write_rds(dt8, "data_inter/master_births_for_baseline_estimation.rds")
 
 
 # ~~~~~~~~~~~~~~~~~~~~~~~~
