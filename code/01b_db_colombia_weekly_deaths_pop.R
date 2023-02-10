@@ -192,7 +192,8 @@ pop_interpol3 <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # standard codes
 codes_std <- 
-  read_csv("data_input/geo_codes_bra_col_mex.csv") %>% 
+  read_csv("data_input/geo_codes_bra_col_mex.csv", 
+           locale = readr::locale(encoding = "latin1")) %>% 
   filter(ISO_Code == "COL")
 
 geo_codes <- 
