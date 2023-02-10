@@ -4,23 +4,25 @@ library(tidyverse)
 library(mgcv)
 library(readxl)
 
+# codes 
 codes <- 
-  read_xlsx("data_input/codes_depto_states.xlsx") %>% 
+  read_csv("data_input/geo_codes_bra_col_mex.csv") %>% 
   rename(country = ISO_Code) %>% 
-  select(geo = geo_std, raw_geolev1) %>% 
+  select(country, geo, geo_gr, raw_geolev1) %>% 
   unique()
 
+# monthly births
 dt <- 
   readRDS("data_inter/covid_tab_all.RDS") 
 
-# births in MEX without state
+# births in MEX without state in 2020 and 2021
 dt %>% 
   filter(is.na(raw_geo1nam),
          raw_country == "MEX",
          raw_yearbir > 2019) %>% 
   summarise(bts = sum(raw_nbirth))
 
-# total births in MEX
+# total births in MEX in 2020 and 2021
 dt %>% 
   filter(!is.na(raw_geo1nam),
          raw_country == "MEX",
@@ -81,6 +83,7 @@ dt2 <-
   summarise(bts = sum(bts)) %>% 
   ungroup()
 
+unique(dt2$geo)
 
 # ~~~~~~~~~~~~~~~~~~
 # imputing education
@@ -413,7 +416,7 @@ test %>%
             col = "black")+
   geom_ribbon(aes(date, ymin = bsn_i_lp, ymax = bsn_i_up, group = edu), fill = "red", alpha = 0.2)+
   geom_line(aes(date, bsn_i, linetype = edu), col = "red")+
-  geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")), 
+  geom_vline(xintercept = c(ymd("2019-12-31")), 
              linetype = "dashed")+
   scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
                date_labels = "%Y")+
