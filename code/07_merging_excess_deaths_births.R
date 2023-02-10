@@ -1,8 +1,8 @@
 rm(list=ls())
 source("Code/00_functions.R")
 
-dts <- read_rds("data_inter/db_monthly_excess_deaths_bra_col_mex.rds")
-bts <- read_rds("data_inter/db_monthly_excess_births_bra_col_mex.rds")
+dts <- read_rds("data_inter/monthly_excess_deaths_bra_col_mex.rds")
+bts <- read_rds("data_inter/monthly_excess_births_bra_col_mex.rds")
 # cds <- read_rds("data_inter/geo_codes_bra_col_mex.rds")
 
 geos_bts <- 
