@@ -32,8 +32,6 @@ bts2 <-
          bts_bsn_uc = bsn_uc,
          bts_bsn_lp = bsn_lp,
          bts_bsn_up = bsn_up) %>% 
-  mutate(geo = case_when(geo == "total" ~ "Total",
-                         TRUE ~ geo)) %>% 
   filter(date >= "2020-01-01") %>% 
   mutate(bts_psc = bts / bts_bsn)
 
@@ -52,10 +50,15 @@ dts_bts <-
   left_join(dts2) %>% 
   left_join(dts_cum2) %>% 
   left_join(geo_codes2) %>% 
-  select(country, geo, geo_label, region_shdi, raw_geolev1, geo_type, everything())
+  select(country, geo, geo_label, region_shdi, raw_geolev1, geo_type, 
+         everything(), -t, -w) 
 
 # saving outputs
 write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
+
+dts_bts <- read_rds("data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
+
+unique(dts_bts$geo)
 
 test <- 
   dts_bts %>% 
