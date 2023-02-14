@@ -1,14 +1,47 @@
 rm(list=ls())
-library(tidyverse)
-library(lubridate)
-library(ggrepel)
-library(ggridges)
+source("Code/00_functions.R")
 
-db <- read_rds("data_inter/db_monthly_excess_deaths_bra_col_mex.rds")
+# excess mortality estimates
+db <- 
+  read_rds("data_inter/monthly_excess_deaths_bra_col_mex.rds")
 
-av_pscores <- 
+# standard codes
+geo_codes <- 
+  read_csv("data_input/geo_codes_bra_col_mex.csv", 
+           locale = readr::locale(encoding = "latin1")) %>% 
+  select(country = ISO_Code,
+         geo, geo_label)
+
+
+# excluding grouped departments from Colombia 
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+reg_amazon <- c("Amazonas",
+                "Caqueta",
+                "Guainia",
+                "Guaviare",
+                "Putumayo",
+                "Vaupes")
+
+reg_orinoq <- c("Arauca", 
+                "Casanare", 
+                "Meta", 
+                "Vichada")
+
+reg_ejecaf <- c("Caldas", 
+                "Risaralda", 
+                "Quindio")
+
+db2 <- 
   db %>% 
-  group_by(country, geo, code) %>% 
+  filter(!geo %in% c(reg_amazon, reg_orinoq, reg_ejecaf))
+
+
+
+# average monthly p-scores
+# ~~~~~~~~~~~~~~~~~~~~~~~~
+av_pscores <- 
+  db2 %>% 
+  group_by(country, geo) %>% 
   summarise(av_pscore = mean(pscore)) %>% 
   arrange(country, -av_pscore) %>% 
   ungroup() %>% 
@@ -16,36 +49,53 @@ av_pscores <-
   mutate(ord = 1:n()) %>% 
   filter(ord <= 4) %>% 
   ungroup() %>% 
-  mutate(col_geo = paste0(geo, " (", country, ")"))
+  left_join(geo_codes) %>% 
+  mutate(col_geo = paste0(geo_label, " (", country, ")")) %>% 
+  select(-geo_label)
 
-db2 <- 
-  db %>% 
+db3 <- 
+  db2 %>% 
   left_join(av_pscores %>% select(-av_pscore)) %>% 
   mutate(col_geo = ifelse(is.na(col_geo), "other", col_geo),
-         ord = ifelse(col_geo == "other", "other", paste0(str_sub(code, 1, 2), ord)),
+         ord = ifelse(col_geo == "other", "other", paste0(country, ord)),
          ident = ifelse(col_geo == "other", "other", "ident"))
 
 cols <-
-  c("BR1" = "#e41a1c",
-    "BR2" = "#377eb8",
-    "BR3" = "#4daf4a",
-    "BR4" = "#984ea3",
-    "CO1" = "#e41a1c",
-    "CO2" = "#377eb8",
-    "CO3" = "#4daf4a",
-    "CO4" = "#984ea3",
-    "MX1" = "#e41a1c",
-    "MX2" = "#377eb8",
-    "MX3" = "#4daf4a",
-    "MX4" = "#984ea3",
+  c("BRA1" = "#e41a1c",
+    "BRA2" = "#377eb8",
+    "BRA3" = "#4daf4a",
+    "BRA4" = "#984ea3",
+    "COL1" = "#e41a1c",
+    "COL2" = "#377eb8",
+    "COL3" = "#4daf4a",
+    "COL4" = "#984ea3",
+    "MEX1" = "#e41a1c",
+    "MEX2" = "#377eb8",
+    "MEX3" = "#4daf4a",
+    "MEX4" = "#984ea3",
     "oth" = "black")
 
-bks <- c(paste0("BR", 1:4), paste0("CO", 1:4), paste0("MX", 1:4))
+cols <-
+  c("BRA1" = "#6a040f",
+    "BRA2" = "#d00000",
+    "BRA3" = "#f77f00",
+    "BRA4" = "#ffba08",
+    "COL1" = "#6a040f",
+    "COL2" = "#d00000",
+    "COL3" = "#f77f00",
+    "COL4" = "#ffba08",
+    "MEX1" = "#6a040f",
+    "MEX2" = "#d00000",
+    "MEX3" = "#f77f00",
+    "MEX4" = "#ffba08",
+    "oth" = "black")
+
+bks <- c(paste0("BRA", 1:4), paste0("COL", 1:4), paste0("MEX", 1:4))
 lbs <- av_pscores %>% pull(col_geo)
 
 tx <- 8
 
-db2 %>% 
+db3 %>% 
   filter(date <= "2021-12-31") %>% 
   ggplot(aes(date, pscore)) +
   geom_boxplot(aes(group = date), outlier.shape = NA, 
@@ -71,7 +121,7 @@ db2 %>%
   facet_wrap(~ country)+
   geom_hline(yintercept = 1, linetype = "dashed")+
   labs(y = "Excess p-score", x = "Month",
-       col = "Extreme values",
+       col = "Subnational divisions\nwith extreme average\np-score values",
        size = "Population")+
   theme_bw()+
   theme(legend.position = "bottom",
@@ -80,12 +130,12 @@ db2 %>%
         strip.background = element_rect(fill = "transparent"),
         strip.text = element_text(size = tx + 4))
 
-ggsave("figures/pscores_boxplot_v2.png",
+ggsave("figures/pscores_boxplot_v1.png",
        dpi = 600,
        w = 16,
        h = 8)
 
-ggsave("figures/pscores_boxplot_v2.pdf",
+ggsave("figures/pscores_boxplot_v1.pdf",
        w = 16,
        h = 8)
 
