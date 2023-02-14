@@ -53,8 +53,6 @@ dts_bts <-
   bts2 %>% 
   left_join(dts2)
 
-%>% 
-  # left_join(cds)
 
 test <- 
   dts_bts %>%
