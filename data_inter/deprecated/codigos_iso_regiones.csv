@@ -1,0 +1,150 @@
+Country,Region,IsoCode
+Argentina,All,AR
+Argentina,Buenos Aires,AR-B
+Argentina,CABA,AR-C
+Argentina,Catamarca,AR-K
+Argentina,Chaco,AR-H
+Argentina,Chubut,AR-U
+Argentina,Córdoba,AR-X
+Argentina,Corrientes,AR-W
+Argentina,Entre Ríos,AR-E
+Argentina,Formosa,AR-P
+Argentina,Jujuy,AR-Y
+Argentina,La Pampa,AR-L
+Argentina,La Rioja,AR-F
+Argentina,Mendoza,AR-M
+Argentina,Misiones,AR-N
+Argentina,Neuquén,AR-Q
+Argentina,Río Negro,AR-R
+Argentina,Salta,AR-A
+Argentina,San Juan,AR-J
+Argentina,San Luis,AR-D
+Argentina,Santa Cruz,AR-Z
+Argentina,Santa Fe,AR-S
+Argentina,Santiago del Estero,AR-G
+Argentina,Tierra del Fuego,AR-V
+Argentina,Tucumán,AR-T
+Brazil,Acre,BR-AC
+Brazil,Alagoas,BR-AL
+Brazil,All,BR
+Brazil,Amapá,BR-AP
+Brazil,Amazonas,BR-AM
+Brazil,Bahia,BR-BA
+Brazil,Ceará,BR-CE
+Brazil,Distrito Federal,BR-DF
+Brazil,Espírito Santo,BR-ES
+Brazil,Goiás,BR-GO
+Brazil,Maranhão,BR-MA
+Brazil,Mato Grosso,BR-MT
+Brazil,Mato Grosso do Sul,BR-MS
+Brazil,Minas Gerais,BR-MG
+Brazil,Pará,BR-PA
+Brazil,Paraíba,BR-PB
+Brazil,Paraná,BR-PR
+Brazil,Pernambuco,BR-PE
+Brazil,Piauí,BR-PI
+Brazil,Rio de Janeiro,BR-RJ
+Brazil,Rio Grande do Norte,BR-RN
+Brazil,Rio Grande do Sul,BR-RS
+Brazil,Rondônia,BR-RO
+Brazil,Roraima,BR-RR
+Brazil,Santa Catarina,BR-SC
+Brazil,São Paulo,BR-SP
+Brazil,Sergipe,BR-SE
+Brazil,Tocantis,BR-TO
+Colombia,All,CO
+Colombia,Amazonas,CO-AMA
+Colombia,Antioquia,CO-ANT
+Colombia,Arauca,CO-ARA
+Colombia,Atlantico,CO-ATL
+Colombia,Barranquilla,CO-BQL
+Colombia,Bogota,CO-DC
+Colombia,Bolivar,CO-BOL
+Colombia,Boyaca,CO-BOY
+Colombia,Caldas,CO-CAL
+Colombia,Cali,CO-CLI
+Colombia,Caqueta,CO-CAQ
+Colombia,Cartagena,CO-CAR
+Colombia,Casanare,CO-CAS
+Colombia,Cauca,CO-CAU
+Colombia,Cesar,CO-CES
+Colombia,Choco,CO-CHO
+Colombia,Cordoba,CO-COR
+Colombia,Cundinamarca,CO-CUN
+Colombia,Guajira,CO-LAG
+Colombia,Guaviare,CO-GUV
+Colombia,Huila,CO-HUI
+Colombia,Magdalena,CO-MAG
+Colombia,Medellin,CO-MLL
+Colombia,Meta,CO-MET
+Colombia,Nariño,CO-Other
+Colombia,Norte Santander,CO-NSA
+Colombia,Putumayo,CO-PUT
+Colombia,Quindio,CO-QUI
+Colombia,Risaralda,CO-RIS
+Colombia,San Andres,CO-SAP
+Colombia,Santa Marta,CO-SMT
+Colombia,Santander,CO-SAN
+Colombia,Sucre,CO-SUC
+Colombia,Tolima,CO-TOL
+Colombia,Valle,CO-VAC
+Colombia,Vichada,CO-Other
+Mexico,Aguascalientes,MX-AGU
+Mexico,All,MX
+Mexico,Baja California,MX-BCN
+Mexico,Baja California Sur,MX-BCS
+Mexico,Campeche,MX-CAM
+Mexico,Chiapas,MX-CHP
+Mexico,Chihuahua,MX-CHH
+Mexico,Ciudad de Mexico,MX-CMX
+Mexico,Coahuila de Zaragoza,MX-COA
+Mexico,Colima,MX-COL
+Mexico,Durango,MX-DUR
+Mexico,Guanajuato,MX-GUA
+Mexico,Guerrero,MX-GRO
+Mexico,Hidalgo,MX-HID
+Mexico,Jalisco,MX-JAL
+Mexico,Mexico,MX-MEX
+Mexico,Michoacan de Ocampo,MX-MIC
+Mexico,Morelos,MX-MOR
+Mexico,Nayarit,MX-NAY
+Mexico,Nuevo Leon,MX-NLE
+Mexico,Oaxaca,MX-OAX
+Mexico,Puebla,MX-PUE
+Mexico,Queretaro,MX-QUE
+Mexico,Quintana Roo,MX-ROO
+Mexico,San Luis Potosi,MX-SLP
+Mexico,Sinaloa,MX-SIN
+Mexico,Sonora,MX-SON
+Mexico,Tabasco,MX-TAB
+Mexico,Tamaulipas,MX-TAM
+Mexico,Tlaxcala,MX-TLA
+Mexico,Veracruz de Ignacio de la Llave,MX-VER
+Mexico,Yucatan,MX-YUC
+Mexico,Zacatecas,MX-ZAC
+Peru,All,PE
+Peru,Amazonas,PE-AMA
+Peru,Ancash,PE-ANC
+Peru,Apurimac,PE-APU
+Peru,Arequipa,PE-ARE
+Peru,Ayacucho,PE-AYA
+Peru,Cajamarca,PE-CAJ
+Peru,Callao,PE-CUS
+Peru,Cusco,PE-CAL
+Peru,Huancavelica,PE-HUV
+Peru,Huanuco,PE-HUC
+Peru,Ica,PE-ICA
+Peru,Junin,PE-JUN
+Peru,La Libertad,PE-LAL
+Peru,Lambayeque,PE-LAM
+Peru,Lima,PE-LIM
+Peru,Loreto,PE-LOR
+Peru,Madre De Dios,PE-MDD
+Peru,Moquegua,PE-MOQ
+Peru,Pasco,PE-PAS
+Peru,Piura,PE-PIU
+Peru,Puno,PE-PUN
+Peru,San Martin,PE-SAM
+Peru,Tacna,PE-TAC
+Peru,Tumbes,PE-TUM
+Peru,Ucayali,PE-UCA

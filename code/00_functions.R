@@ -1,58 +1,52 @@
-# Author: Enrique Acosta
-# kikepaila@gmail.com
-
 # Description:
 # Functions and preparation of environment script
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 Sys.setenv(LANG = "en")
 Sys.setlocale("LC_ALL","English")
-
 set.seed(1234)
 options(scipen=999)
 
 # Installing missing packages
 # ===========================
-
 # install pacman to streamline further package installation
 if(!require("pacman", character.only = TRUE)) {
   install.packages("pacman", dep = TRUE)
   if (!require("pacman", character.only = TRUE))
     stop("Package pacman not found")
 }
-
 library(pacman)
-
 # Required CRAN packages
 pkgs <- c("tidyverse",
           "here",
           "lubridate",
           "mgcv",
           "ISOweek",
-          "readxl")
+          "readxl",
+          "ggrepel",
+          "ggridges")
 
 # Install required CRAN packages if not available yet
-if(!sum(!p_isinstalled(c(pkgs)))==0) {
-  p_install(
-    package = pkgs[!p_isinstalled(pkgs)], 
-    character.only = TRUE
-  )
+if(sum(!p_isinstalled(c(pkgs)))!=0) {
+  for(i in 1:length(pkgs[!p_isinstalled(pkgs)])){
+    p_install(
+      package = pkgs[!p_isinstalled(pkgs)][i], 
+      character.only = TRUE
+    )
+  }
 }
-
-# ====
-
 
 # loading required packages
 # =========================
 p_load(pkgs, character.only = TRUE)
 
-
 # ====
 copy_this <- function(x,row.names=FALSE,col.names=TRUE,...) {
-  write.table(x,file = paste0("clipboard-", object.size(x)),sep="\t",row.names=row.names,col.names=col.names,...)
+  write.table(x,
+              file = paste0("clipboard-", object.size(x)),
+              sep="\t",
+              row.names=row.names,
+              col.names=col.names,...)
 }
-
 
 # function for weekly population interpolation 
 # ============================================
@@ -68,8 +62,6 @@ interpop <- function(db)
   return(db2)
 }
 # ====
-
-
 
 # functions for baseline mortality estimation
 # ===========================================
@@ -226,3 +218,142 @@ give_me_baseline <-
   }
 
 
+# chunk <- 
+#   dt8 %>% 
+#   filter(country == "COL",
+#          geo == "Guainia",
+#          edu == "8-11",
+#          age == "40-54",
+#          imp_type == "n")
+
+
+pred_births <- function(chunk){
+  
+  step <- 
+    paste(unique(chunk$country), 
+          unique(chunk$geo),
+          "edu",
+          unique(chunk$edu), 
+          "age",
+          unique(chunk$age), 
+          unique(chunk$imp_type),
+          sep = "_")
+  
+  cat(paste0(step, "\n"))
+  
+  try(
+    model <- 
+      gam(bts ~ t + s(mth, bs = 'cp'), 
+          weights = w,
+          data = chunk, 
+          family = "quasipoisson")
+  )
+  
+  test <- 
+    try(
+      pred <- 
+        predict(model, 
+                type = "response", 
+                se.fit = T,
+                newdata = chunk)
+    )
+  
+  try(
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = pred$fit,
+             bsn_lc = bsn - 1.96 * pred$se.fit,
+             bsn_uc = bsn + 1.96 * pred$se.fit) %>% 
+      left_join(simul_intvals_no_off(model, 
+                                     model_type = "gam", 
+                                     db = chunk, 
+                                     nsim = 100,
+                                     p = 0.95),
+                by = "t")
+  )
+  
+  if(class(test) == "try-error"){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = NA,
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_lp = NA,
+             bsn_up = NA)
+  }
+  return(chunk2)
+}
+
+simul_intvals_no_off <-
+  function(
+    # fitted model
+    model,
+    # either GLM or GAM (needed for model matrix extraction step)
+    model_type,
+    # prediction data
+    db,
+    # number of iterations
+    nsim,
+    # prediction intervals' uncertainty level (between 0 and 1)
+    p
+  ){
+    
+    # defining upper and lower prediction quantiles
+    lp <- (1 - p) / 2
+    up <- 1 - lp
+    
+    # matrix model extraction
+    if(model_type == "glm"){
+      X_prd <- model.matrix(model, data = db, na.action = na.pass)
+    }
+    if(model_type == "gam"){
+      X_prd <- predict(model, newdata = db, type = 'lpmatrix')
+    }
+    
+    # estimated coefficients
+    beta <- coef(model)
+    
+    # extracting variance covariance matrix
+    beta_sim <- MASS::mvrnorm(nsim,
+                              coef(model),
+                              suppressWarnings(vcov(model)))
+    
+    # simulation process
+    Ey_sim <- apply(beta_sim, 1, FUN = function (b) exp(X_prd %*% b))
+    
+    y_sim <- apply(Ey_sim, 2, FUN = function (Ey) {
+      y <- mu <- Ey
+      # NA's can't be passed to the simulation functions, so keep them out
+      idx_na <- is.na(mu)
+      mu_ <- mu[!idx_na]
+      N <- length(mu_)
+      phi <- suppressWarnings(summary(model)$dispersion)
+      # in case of under-dispersion, sample from Poisson
+      if (phi < 1) { phi = 1 }
+      y[!idx_na] <- rnbinom(n = N, mu = mu_, size = mu_/(phi-1))
+      return(y)
+    })
+    
+    # from wide to tidy format
+    ints_simul <-
+      db %>%
+      select(t)
+    
+    colnames_y_sim <- paste0('bsn_sim', 1:nsim)
+    
+    ints_simul[,colnames_y_sim] <- y_sim
+    
+    # prediction intervals output
+    ints_simul <-
+      ints_simul %>%
+      pivot_longer(cols = starts_with('bsn_sim'),
+                   names_to = 'sim_id', values_to = 'bsn_sim') %>%
+      group_by(t) %>%
+      summarise(
+        bsn_lp = quantile(bsn_sim, lp, na.rm = TRUE),
+        bsn_up = quantile(bsn_sim, up, na.rm = TRUE),
+        .groups = 'drop'
+      )
+    
+    return(ints_simul)
+  }

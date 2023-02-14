@@ -1,7 +1,7 @@
-
+rm(list=ls())
+source("Code/00_functions.R")
 
 {
-  source("Code/00_functions.R")
   # Source of data
   # https://opendatasus.saude.gov.br/dataset/sistema-de-informacao-sobre-mortalidade-sim-1979-a-2019
   # dictionnary
@@ -17,61 +17,6 @@
 
   # loading deaths from microdata ====
   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-  
-              # <<<<<<< HEAD
-              #   # csv_files <- paste0("data_input/brazil/Mortalidade_Geral_", 2015:2021, ".csv")
-              #   # out <- list()
-              #   # for (i in csv_files){
-              #   #   cat(i)
-              #   #   out[[i]] <- 
-              #   #     read_delim(i,
-              #   #                delim = ";",
-              #   #                col_types = cols(.default = "c")) %>%
-              #   #     filter(TIPOBITO == "2") %>%
-              #   #     select(date = DTOBITO, mun_code = CODMUNOCOR) %>%
-              #   #     mutate(date = dmy(date),
-              #   #            isoweek = date2ISOweek(date),
-              #   #            year = str_sub(isoweek, 1, 4) %>% as.double(),
-              #   #            week = str_sub(isoweek, 7, 8) %>% as.double(),
-              #   #            state_num = str_sub(mun_code, 1, 2)) %>%
-              #   #     group_by(year, week, state_num) %>%
-              #   #     summarise(dts = n()) %>%
-              #   #     ungroup()
-              #   # }
-              #   # 
-              #   # dts <-
-              #   #   out %>%
-              #   #   bind_rows() %>%
-              #   #   mutate(isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
-              #   #          date = ISOweek2date(isoweek),
-              #   #          state_num = state_num %>% as.double()) %>% 
-              #   #   filter(year >= 2015) %>% 
-              #   #   left_join(reg_codes) %>% 
-              #   #   select(-isoweek, -region, -state_num) %>% 
-              #   #   rename(state = state_name)
-              #   # 
-              #   # dts_nal <- 
-              #   #   dts %>% 
-              #   #   group_by(year, week, date) %>% 
-              #   #   summarise(dts = sum(dts)) %>% 
-              #   #   ungroup() %>% 
-              #   #   mutate(state = "Total",
-              #   #          state_iso = "BR") %>% 
-              #   #   bind_rows(dts) %>% 
-              #   #   arrange(state, date)
-              #   
-              #   
-              #   # # saving daily deaths by state
-              #   # write_rds(dts_nal, "data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
-              #   
-              #   # ====
-              #   
-              #   
-              #   # loading daily deaths by state ====
-              #   # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-              #   dts_nal <- read_rds("data_inter/brazil_weekly_deaths_by_state_2015_2021.rds")
-              # }
-              # =======
   # deaths 2021
   # source: http://svs.aids.gov.br/dantps/centrais-de-conteudos/dados-abertos/sim/
   # # converting 2021 from dbf to csv
@@ -141,6 +86,7 @@ pop <-
   read_csv2("data_input/brazil/bra_population_state_2010_2025.csv",
             skip = 3) %>% 
   drop_na(RO) %>% 
+  select(-Total) %>% 
   rename(year = Ano) %>% 
   gather(-year, key = state_iso, value = pop) %>% 
   mutate(week = 26, 
@@ -187,7 +133,23 @@ bra_dts_pop <-
   left_join(pop_interpol3) %>% 
   arrange(state, date)
 
-write_rds(bra_dts_pop, "data_inter/brazil_deaths_population_2015_2021.rds")
 
-  
-  
+# standard names for states
+# ~~~~~~~~~~~~~~~~~~~~~~~~~
+codes_std <- 
+  read_csv("data_input/geo_codes_bra_col_mex.csv") %>% 
+  filter(ISO_Code == "BRA") %>% 
+  select(geo_iso, 
+         geo)
+
+bra_out <- 
+  bra_dts_pop %>% 
+  mutate(country = "BRA",
+         isoweek = paste0(year, "-W", sprintf("%02d", week), "-7"),
+         geo_iso = ifelse(state == "Total", state_iso, paste0("BR-", state_iso))) %>% 
+  left_join(codes_std) %>% 
+  select(country, geo, geo_iso, date, isoweek, year, week, dts, pop)
+
+
+write_rds(bra_out, "data_inter/brazil_deaths_population_2015_2021.rds")
+

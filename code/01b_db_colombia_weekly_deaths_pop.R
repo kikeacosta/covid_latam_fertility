@@ -1,3 +1,4 @@
+rm(list=ls())
 source("Code/00_functions.R")
 
 # col <- read_xlsx("data_input/colombia/anexos-defunciones-covid-dept-semana-22-2022.xlsx",
@@ -187,15 +188,47 @@ pop_interpol3 <-
   mutate(geo = "Total") %>% 
   bind_rows(pop_interpol2)
 
+# putting together weekly deaths and populations
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# standard codes
+codes_std <- 
+  read_csv("data_input/geo_codes_bra_col_mex.csv", 
+           locale = readr::locale(encoding = "latin1")) %>% 
+  filter(ISO_Code == "COL")
 
+geo_codes <- 
+  codes_std %>% 
+  select(geo, geo_iso)
+
+col_dts_pop <- 
+  col4 %>% 
+  left_join(pop_interpol3) %>% 
+  mutate(geo = recode(geo,
+                      "Atlántico" = "Atlantico",
+                      "Bogotá" = "Bogota",
+                      "Bolívar" = "Bolivar",
+                      "Boyacá" = "Boyaca",
+                      "Caquetá" = "Caqueta",
+                      "Chocó" = "Choco",
+                      "Córdoba" = "Cordoba",
+                      "Guainía" = "Guainia",
+                      "La Guajira" = "Guajira",
+                      "Nariño" = "Narino",
+                      "Quindío" = "Quindio",
+                      "San Andrés y Providencia" = "San Andres",
+                      "Valle del Cauca" = "Valle",
+                      "Vaupés" = "Vaupes")) 
+
+# grouping three regions
 # grouping together regions in Colombia
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 reg_amazon <- c("Amazonas",
-                "Caquetá",
-                "Guainía",
+                "Caqueta",
+                "Guainia",
                 "Guaviare",
                 "Putumayo",
-                "Vaupés")
+                "Vaupes")
 
 reg_orinoq <- c("Arauca", 
                 "Casanare", 
@@ -204,26 +237,28 @@ reg_orinoq <- c("Arauca",
 
 reg_ejecaf <- c("Caldas", 
                 "Risaralda", 
-                "Quindío")
+                "Quindio")
 
-# excluding San Andres y Providencia
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-exc <- c("San Andrés y Providencia")
-exc <- c()
+# reg_codes <- 
+#   codes_std %>% 
+#   select(geo = geo_gr, geo_iso = geo_iso_gr)
 
-# putting together weekly deaths and populations
-col_dts_pop <- 
-  col4 %>% 
-  left_join(pop_interpol3) %>% 
-  mutate(geo = case_when(geo %in% reg_amazon ~ "Amazonía",
-                         geo %in% reg_orinoq ~ "Orinoquía",
+regs_dts_pop <- 
+  col_dts_pop %>% 
+  filter(geo %in% c(reg_amazon, reg_orinoq, reg_ejecaf)) %>% 
+  mutate(geo = case_when(geo %in% reg_amazon ~ "Amazonia",
+                         geo %in% reg_orinoq ~ "Orinoquia",
                          geo %in% reg_ejecaf ~ "Eje Cafetero",
                          TRUE ~ geo)) %>% 
-  filter(!(geo %in% exc)) %>% 
   group_by(year, week, geo, isoweek, date) %>% 
   summarise(dts = sum(dts),
             pop = sum(pop)) %>% 
   ungroup()
 
-write_rds(col_dts_pop, "data_inter/colombia_deaths_population_2015_2021.rds")
+col_out <- 
+  bind_rows(col_dts_pop, regs_dts_pop) %>% 
+  mutate(country = "COL") %>% 
+  left_join(geo_codes)
+
+write_rds(col_out, "data_inter/colombia_deaths_population_2015_2021.rds")
 
