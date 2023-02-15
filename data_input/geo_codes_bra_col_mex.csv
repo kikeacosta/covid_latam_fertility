@@ -26,8 +26,8 @@ BRA,Santa Catarina,Santa Catarina,76042,Santa Catarina,Santa Catarina,BR-SC,Sant
 BRA,Sao Paulo,São Paulo,76035,Sao Paulo,São Paulo,BR-SP,São Paulo,single
 BRA,Sergipe,Sergipe,76028,Sergipe,Sergipe,BR-SE,Sergipe,single
 BRA,Tocantins,Tocantins,76017,Tocantins,Tocantins,BR-TO,Tocantins,single
-BRA,Total,Total,76000,Total,Total,BR,Total,single
-COL,Amazonas,Amazonas,170091,Amazonas,Amazonía,CO-AMA,Amazonas,to_group_a
+BRA,total,total,76000,Total,Total,BR,Total,country
+COL,Amazonas,Amazonas,170091,Amazonas,Amazonas,CO-AMA,Amazonas,to_group_a
 COL,Antioquia,Antioquia,170005,Antioquia (incl Medellin),Antioquia,CO-ANT,Antioquia,single
 COL,Arauca,Arauca,170081,Arauca,Arauca,CO-ARA,Arauca,to_group_o
 COL,Atlantico,Atlantico,170008,Atlantico (incl Barranquilla),Atlántico,CO-ATL,Atlántico,single
@@ -63,10 +63,10 @@ COL,Vichada,Vichada,170099,Vichada,Vichada,CO-VID,Vichada,to_group_o
 COL,Orinoquia,Orinoquia,,Orinoquia,Orinoquia,CO-ORI,Orinoquía (region),group
 COL,Amazonia,Amazonia,,Amazonia,Amazonia,CO-AMZ,Amazonía (region),group
 COL,Eje Cafetero,Eje Cafetero,,Eje Cafetero,Eje Cafetero,CO-EJE,Eje Cafetero (region),group
-COL,Total,Total,170000,Total,Total,CO,Total,single
+COL,total,total,170000,Total,Total,CO,Total,country
 MEX,Aguascalientes,Aguascalientes,484001,Aguascalientes,Aguascalientes,MX-AGU,Aguascalientes,single
-MEX,Baja California,Baja California,484002,Baja California,Baja California,MX-BCN,Baja California,single
-MEX,Baja California Sur,Baja California Sur,484003,Baja California Sur,Baja California Sur,MX-BCS,Baja California Sur,single
+MEX,Baja California,Baja California,484002,Baja California,Baja California,MX-BCN,Baja California,to_group_b
+MEX,Baja California Sur,Baja California Sur,484003,Baja California Sur,Baja California Sur,MX-BCS,Baja California Sur,to_group_b
 MEX,Campeche,Campeche,484004,Campeche,Campeche,MX-CAM,Campeche,single
 MEX,Chiapas,Chiapas,484007,Chiapas,Chiapas,MX-CHP,Chiapas,single
 MEX,Chihuahua,Chihuahua,484008,Chihuahua,Chihuahua,MX-CHH,Chihuahua,single
@@ -96,4 +96,5 @@ MEX,Tlaxcala,Tlaxcala,484029,Tlaxcala,Tlaxcala,MX-TLA,Tlaxcala,single
 MEX,Veracruz,Veracruz,484030,Veracruz,Veracruz,MX-VER,Veracruz,single
 MEX,Yucatan,Yucatan,484031,Yucatan,Yucatán,MX-YUC,Yucatán,single
 MEX,Zacatecas,Zacatecas,484032,Zacatecas,Zacatecas,MX-ZAC,Zacatecas,single
-MEX,Total,Total,484000,Total,Total,MX,Total,single
+MEX,Baja Californias,Baja Californias,,Baja Californias,Baja Californias,CO-BC,Baja Californias (region),group
+MEX,total,total,484000,Total,Total,MX,Total,country
