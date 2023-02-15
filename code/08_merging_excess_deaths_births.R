@@ -26,7 +26,6 @@ dts_cum2 <-
 # ~~~~~~~~~~~~~~~~~~
 bts2 <- 
   bts %>% 
-  select(-bsn_lc, -bsn_uc) %>% 
   rename(month = mth,
          bts_bsn = bsn,
          bts_bsn_lp = bsn_lp,

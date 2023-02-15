@@ -73,10 +73,16 @@ bsn <-
          bsn_lp = bsn_lp - 1,
          bsn_up = bsn_up - 1)
 
-# saving outputs
-write_rds(bsn, "data_inter/monthly_excess_births_bra_col_mex.rds")
+bsn_out <- 
+  bsn %>% 
+  mutate(bsn = ifelse(bsn < 0, 0, bsn),
+         bsn_lp = ifelse(bsn_lp < 0, 0, bsn_lp),
+         bsn_up = ifelse(bsn_up < 0, 0, bsn_up))
 
-bsn %>% 
+# saving outputs
+write_rds(bsn_out, "data_inter/monthly_excess_births_bra_col_mex.rds")
+
+bsn_out %>% 
   filter(geo == "total",
          age == "total",
          imp_type == "i") %>% 
@@ -100,7 +106,7 @@ ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
        w = 10,
        h = 5)
 
-bsn %>% 
+bsn_out %>% 
   filter(geo == "total",
          edu == "total",
          imp_type == "i") %>% 
@@ -124,7 +130,7 @@ ggsave("figures/births_monthly_baseline_national_levels_all_educ.png",
        w = 10,
        h = 5)
 
-bsn %>% 
+bsn_out %>% 
   filter(country == "MEX",
          geo == "total",
          edu != "total",
