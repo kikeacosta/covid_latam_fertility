@@ -103,6 +103,37 @@ est_baseline <-
            ul_r = ul / exposure)
 }
 
+
+est_baseline2 <- 
+  function(db, knots = NA){
+    
+    
+    if(!is.na(knots)){
+      gam_model <- 
+        gam(dts ~ t + 
+              s(month, bs = 'cp', k = knots) +
+              offset(log(exposure)), 
+            weights = w,
+            data = db, 
+            family = "quasipoisson")
+    }else{
+      gam_model <- 
+        gam(dts ~ t + 
+              s(month, bs = 'cp') +
+              offset(log(exposure)), 
+            weights = w,
+            data = db, 
+            family = "quasipoisson")
+    }
+    
+    resp <- predict(gam_model, newdata = db, type = "response")
+    
+    db %>% 
+      mutate(bsn = resp) %>% 
+      left_join(simul_intvals(gam_model, db, 1000),
+                by = "date") 
+  }
+
 # bootstrapping using Jonas' method 
 simul_intvals <- function(model, db, nsim){
   # matrix model
@@ -226,6 +257,14 @@ give_me_baseline <-
 #          age == "40-54",
 #          imp_type == "n")
 
+# chunk <- 
+#   dt %>% 
+#   mutate(bts = bts + 1) %>% 
+#   filter(country == "COL",
+#          geo == "San Andres",
+#          edu == "0-3",
+#          age == "10-19",
+#          imp_type == "i")
 
 pred_births <- function(chunk){
   
@@ -258,29 +297,34 @@ pred_births <- function(chunk){
                 newdata = chunk)
     )
   
-  try(
+  if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
     chunk2 <- 
       chunk %>% 
-      mutate(bsn = pred$fit,
-             bsn_lc = bsn - 1.96 * pred$se.fit,
-             bsn_uc = bsn + 1.96 * pred$se.fit) %>% 
+      mutate(bsn = pred$fit) %>% 
       left_join(simul_intvals_no_off(model, 
                                      model_type = "gam", 
                                      db = chunk, 
                                      nsim = 100,
                                      p = 0.95),
                 by = "t")
-  )
+  }
+  
+  if(class(test) != "try-error" & model$outer.info$conv != "full convergence"){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = pred$fit,
+             bsn_lp = NA,
+             bsn_up = NA)
+  }
   
   if(class(test) == "try-error"){
     chunk2 <- 
       chunk %>% 
       mutate(bsn = NA,
-             bsn_lc = NA,
-             bsn_uc = NA,
              bsn_lp = NA,
              bsn_up = NA)
   }
+
   return(chunk2)
 }
 

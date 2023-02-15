@@ -11,7 +11,7 @@ codes <-
   read_csv("data_input/geo_codes_bra_col_mex.csv", 
            locale = readr::locale(encoding = "latin1")) %>% 
   rename(country = ISO_Code) %>% 
-  select(country, geo,raw_geolev1) %>% 
+  select(country, geo, raw_geolev1) %>% 
   unique()
 
 
@@ -19,16 +19,20 @@ codes <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # baseline estimation ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~
-
 # quick test with total national by educational level 
 test <- 
   dt %>% 
+  mutate(bts = bts + 1) %>% 
   filter(geo == "total",
          # edu == "8-11",
          age == "20-29") %>% 
   group_by(country, geo, age, edu, imp_type) %>%
   do(pred_births(chunk = .data)) %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(bts = bts - 1,
+         bsn = bsn - 1,
+         bsn_lp = bsn_lp - 1,
+         bsn_up = bsn_up - 1)
 
 test %>% 
   filter(geo == "total",
@@ -55,14 +59,19 @@ ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
 # estimating baselines for all combinations 
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # 23 mins at home
-# 23 mins in hydra 11
-# 23 mins at the office
+# 30 mins in hydra 11
+# 15 mins at the office
 
 bsn <- 
   dt %>% 
+  mutate(bts = bts + 1) %>% 
   group_by(country, geo, age, edu, imp_type) %>%
   do(pred_births(chunk = .data)) %>% 
-  ungroup()
+  ungroup() %>% 
+  mutate(bts = bts - 1,
+         bsn = bsn - 1,
+         bsn_lp = bsn_lp - 1,
+         bsn_up = bsn_up - 1)
 
 # saving outputs
 write_rds(bsn, "data_inter/monthly_excess_births_bra_col_mex.rds")
@@ -71,6 +80,10 @@ bsn %>%
   filter(geo == "total",
          age == "total",
          imp_type == "i") %>% 
+  mutate(dts_r = dts / exposure,
+         bsn_r = bsn / exposure,
+         ll_r = ll / exposure,
+         ul_r = ul / exposure) %>% 
   ggplot()+
   geom_line(aes(date, bts, linetype = edu, group = edu), 
             col = "black")+
@@ -87,10 +100,14 @@ ggsave("figures/births_monthly_baseline_national_levels_all_ages.png",
        w = 10,
        h = 5)
 
-
 bsn %>% 
   filter(geo == "total",
-         edu == "total") %>% 
+         edu == "total",
+         imp_type == "i") %>% 
+  mutate(dts_r = dts / exposure,
+         bsn_r = bsn / exposure,
+         ll_r = ll / exposure,
+         ul_r = ul / exposure) %>% 
   ggplot()+
   geom_line(aes(date, bts, linetype = age, group = age), 
             col = "black")+
@@ -111,7 +128,8 @@ bsn %>%
   filter(country == "MEX",
          geo == "total",
          edu != "total",
-         age != "total") %>% 
+         age != "total",
+         imp_type == "i") %>% 
   group_by(year) %>% 
-  summarise(bts = sum(bts_n))
+  summarise(bts = sum(bts))
 
