@@ -220,9 +220,9 @@ unique(dt6$geo) %>% sort
 unique(dt6$imp_type)
 
 
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
-# adding Colombian regions
-# ~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# adding Colombian and Mexican regions
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 # regions to group together
 reg_amazon <- c("Amazonas",
@@ -245,12 +245,18 @@ reg_ejecaf <- c("Caldas",
                 "Risaralda", 
                 "Quindío",
                 "Quindio")
+
+reg_baja_cali <- c("Baja California",
+                   "Baja California Sur")
+
 dt7 <- 
   dt6 %>% 
-  filter(country == "COL" & geo %in% c(reg_amazon, reg_orinoq, reg_ejecaf)) %>% 
+  filter(country == "COL" & geo %in% c(reg_amazon, reg_orinoq, reg_ejecaf) | 
+           country == "MEX" & geo %in% reg_baja_cali) %>% 
   mutate(geo = case_when(country == "COL" & geo %in% reg_amazon ~ "Amazonia",
                          country == "COL" & geo %in% reg_orinoq ~ "Orinoquia",
                          country == "COL" & geo %in% reg_ejecaf ~ "Eje Cafetero",
+                         country == "MEX" & geo %in% reg_baja_cali ~ "Baja Californias",
                          TRUE ~ geo)) %>% 
   group_by(country, geo, date, year, mth, age, edu, imp_type) %>% 
   summarise(bts = sum(bts)) %>% 

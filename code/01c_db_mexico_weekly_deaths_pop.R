@@ -169,8 +169,25 @@ codes_std <-
   filter(ISO_Code == "MEX") %>% 
   select(geo, geo_iso)
 
-mex_out <- 
+
+# grouping together Baja California and Baja California Sur 
+unique(dts_pop$div)
+
+reg_baja_cali <- c("Baja California",
+                   "Baja California Sur")
+
+regs_dts_pop <- 
   dts_pop %>% 
+  filter(div %in% c(reg_baja_cali)) %>% 
+  mutate(div = case_when(div %in% reg_baja_cali ~ "Baja Californias",
+                         TRUE ~ div)) %>% 
+  group_by(week, div, isoweek, date) %>% 
+  summarise(dts = sum(dts),
+            pop = sum(pop)) %>% 
+  ungroup()
+
+mex_out <- 
+  bind_rows(dts_pop, regs_dts_pop) %>% 
   rename(geo = div) %>% 
   mutate(country = "MEX",
          geo = case_when(geo == "Ciudad de Mexico" ~ "Distrito Federal",
