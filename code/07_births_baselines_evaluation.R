@@ -3,7 +3,7 @@ source("Code/00_functions.R")
 
 # loading data
 # ~~~~~~~~~~~~
-bts <- read_rds("data_inter/monthly_excess_births_bra_col_mex.rds")
+bts <- read_rds("data_inter/monthly_excess_births_bra_col_mex_edu03.rds")
 geo_codes <- read_csv("data_input/geo_codes_bra_col_mex.csv", 
                       locale = readr::locale(encoding = "latin1")) %>% 
   rename(country = ISO_Code) %>% 
@@ -97,6 +97,142 @@ for(i in 0:n){
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+unique(bts2$age)
+unique(bts2$edu)
+bts2 %>% 
+  filter(country == "MEX", age == "40-54") %>%
+  ggplot()+
+  geom_point(aes(date, bts))+
+  geom_line(aes(date, bsn))+
+  geom_ribbon(aes(ymin = bsn_lp, ymax = bsn_up, x = date), alpha = 0.2)+
+  facet_wrap(edu+age~country+geo, scales = "free_y", ncol = 5)+
+  geom_vline(xintercept = ymd("2020-03-01"), linetype = "dashed")+
+  theme_bw()+
+  scale_y_continuous(labels=scaleFUN)+
+  scale_shape_manual(values = c(16, 17))+
+  theme(legend.position = "none")
+
+ggsave(paste0("figures/problems_mex_births_age_40_54.pdf"),
+       dpi = 600,
+       h = 160, w = 10,
+       limitsize = FALSE)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# all... too large!
+bts2 %>% 
+  ggplot()+
+  geom_point(aes(date, bts))+
+  geom_line(aes(date, bsn))+
+  geom_ribbon(aes(ymin = bsn_lp, ymax = bsn_up, x = date), alpha = 0.2)+
+  facet_wrap(edu+age~country+geo, scales = "free_y", ncol = 5)+
+  geom_vline(xintercept = ymd("2020-03-01"), linetype = "dashed")+
+  theme_bw()+
+  scale_y_continuous(labels=scaleFUN)+
+  scale_shape_manual(values = c(16, 17))+
+  theme(legend.position = "none")
+
+ggsave(paste0("figures/all_baselines.pdf"),
+       dpi = 600,
+       h = 300, w = 20,
+       limitsize = FALSE)
+
+
+
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+tx <- 6
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Mexico
+bts2 %>% 
+  filter(country == "MEX") %>%
+  ggplot()+
+  geom_point(aes(date, bts), size = 0.5)+
+  geom_line(aes(date, bsn))+
+  geom_ribbon(aes(ymin = bsn_lp, ymax = bsn_up, x = date), alpha = 0.2)+
+  facet_wrap(edu+age~geo, scales = "free_y", ncol = 5)+
+  geom_vline(xintercept = ymd("2020-03-01"), linetype = "dashed")+
+  theme_bw()+
+  scale_y_continuous(labels=scaleFUN)+
+  scale_shape_manual(values = c(16, 17))+
+  theme(legend.position = "none",
+        axis.text = element_text(size = tx),
+        axis.title = element_text(size = tx),
+        strip.background = element_blank(),
+        strip.text = element_text(size = tx, margin = margin (.5, .5, .5, .5)),
+        panel.spacing = unit(0.1, "lines"))
+
+ggsave(paste0("figures/baselines_mex_births_edu03.pdf"),
+       dpi = 600,
+       h = 160, w = 10,
+       limitsize = FALSE)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# Colombia
+bts2 %>% 
+  filter(country == "COL") %>%
+  ggplot()+
+  geom_point(aes(date, bts), size = 0.5)+
+  geom_line(aes(date, bsn))+
+  geom_ribbon(aes(ymin = bsn_lp, ymax = bsn_up, x = date), alpha = 0.2)+
+  facet_wrap(edu+age~geo, scales = "free_y", ncol = 5)+
+  geom_vline(xintercept = ymd("2020-03-01"), linetype = "dashed")+
+  theme_bw()+
+  scale_y_continuous(labels=scaleFUN)+
+  scale_shape_manual(values = c(16, 17))+
+  theme(legend.position = "none",
+        axis.text = element_text(size = tx),
+        axis.title = element_text(size = tx),
+        strip.background = element_blank(),
+        strip.text = element_text(size = tx, margin = margin (.5, .5, .5, .5)),
+        panel.spacing = unit(0.1, "lines"))
+
+ggsave(paste0("figures/baselines_col_births_edu03.pdf"),
+       dpi = 600,
+       h = 160, w = 10,
+       limitsize = FALSE)
+
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# Brazil
+bts2 %>% 
+  filter(country == "BRA") %>%
+  ggplot()+
+  geom_point(aes(date, bts), size = 0.5)+
+  geom_line(aes(date, bsn))+
+  geom_ribbon(aes(ymin = bsn_lp, ymax = bsn_up, x = date), alpha = 0.2)+
+  facet_wrap(edu+age~geo, scales = "free_y", ncol = 5)+
+  geom_vline(xintercept = ymd("2020-03-01"), linetype = "dashed")+
+  theme_bw()+
+  scale_y_continuous(labels=scaleFUN)+
+  scale_shape_manual(values = c(16, 17))+
+  theme(legend.position = "none",
+        axis.text = element_text(size = tx),
+        axis.title = element_text(size = tx),
+        strip.background = element_blank(),
+        strip.text = element_text(size = tx, margin = margin (.5, .5, .5, .5)),
+        panel.spacing = unit(0.1, "lines"))
+
+ggsave(paste0("figures/baselines_bra_births_edu03.pdf"),
+       dpi = 600,
+       h = 160, w = 10,
+       limitsize = FALSE)
+
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+
+
+
+
+
+
 
 
 comb_prob <- 

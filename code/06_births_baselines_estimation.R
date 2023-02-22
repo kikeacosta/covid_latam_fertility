@@ -80,7 +80,7 @@ bsn_out <-
          bsn_up = ifelse(bsn_up < 0, 0, bsn_up))
 
 # saving outputs
-write_rds(bsn_out, "data_inter/monthly_excess_births_bra_col_mex.rds")
+write_rds(bsn_out, "data_inter/monthly_excess_births_bra_col_mex_edu03.rds")
 
 bsn_out %>% 
   filter(geo == "total",

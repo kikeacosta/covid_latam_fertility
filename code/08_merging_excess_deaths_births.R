@@ -5,7 +5,7 @@ source("Code/00_functions.R")
 # ~~~~~~~~~~~~
 dts <- read_rds("data_inter/monthly_excess_deaths_bra_col_mex.rds")
 dts_cum <- read_rds("data_inter/monthly_cumulative_pscores.rds")
-bts <- read_rds("data_inter/monthly_excess_births_bra_col_mex.rds")
+bts <- read_rds("data_inter/monthly_excess_births_bra_col_mex_edu03.rds")
 geo_codes <- read_csv("data_input/geo_codes_bra_col_mex.csv", 
                       locale = readr::locale(encoding = "latin1"))
 

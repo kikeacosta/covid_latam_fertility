@@ -11,7 +11,7 @@ codes <-
 
 # monthly births
 dt <- 
-  readRDS("data_inter/covid_tab_all.RDS") 
+  readRDS("data_inter/covid_tab_all_edu03.RDS") 
 
 
 

@@ -304,8 +304,8 @@ pred_births <- function(chunk){
       left_join(simul_intvals_no_off(model, 
                                      model_type = "gam", 
                                      db = chunk, 
-                                     nsim = 100,
-                                     p = 0.95),
+                                     nsim = 200,
+                                     p = 0.9),
                 by = "t")
   }
   

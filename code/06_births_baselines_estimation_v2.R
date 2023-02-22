@@ -99,12 +99,12 @@ chunk <-
           data = chunk, 
           family = "quasipoisson")
   )
-  AIC(model1)
-  AIC(model2)
-  extractAIC(model1)
-  extractAIC(model2)
-  model1$aic
-  model2$aic
+  # AIC(model1)
+  # AIC(model2)
+  # extractAIC(model1)
+  # extractAIC(model2)
+  # model1$aic
+  # model2$aic
   
   
   
@@ -141,7 +141,7 @@ chunk <-
              bsn_up = NA)
   }
   return(chunk2)
-}
+# }
 
 simul_intvals_no_off <-
   function(
