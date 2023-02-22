@@ -63,9 +63,9 @@ dts_bts <-
   mutate(flag_prob = ifelse(is.na(flag_prob), 0, 1))
 
 # saving outputs
-write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
+write_rds(dts_bts, "data_inter/master_monthly_excess_deaths_births_bra_col_mex_edu03.rds")
 
-dts_bts <- read_rds("data_inter/master_monthly_excess_deaths_births_bra_col_mex.rds")
+dts_bts <- read_rds("data_inter/master_monthly_excess_deaths_births_bra_col_mex_edu03.rds")
 
 unique(dts_bts$geo)
 
