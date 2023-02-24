@@ -204,7 +204,7 @@ bsn_2stp <-
   # adjusted to actual levels after fitting the baseline 
   mutate(bts = bts + 1) %>% 
   group_by(country, geo, age, edu, imp_type) %>%
-  do(fitting2step(chunk = .data, ns = 500)) %>% 
+  do(fitting2step(chunk = .data, ns = 200)) %>% 
   ungroup()
 
 bsn_out <- 

@@ -13,8 +13,6 @@ codes <-
 dt <- 
   readRDS("data_inter/covid_tab_all_edu03.RDS") 
 
-
-
 # MEX without state 
 # ~~~~~~~~~~~~~~~~~
 # births in MEX without state in 2020 and 2021
