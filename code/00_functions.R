@@ -249,13 +249,13 @@ give_me_baseline <-
   }
 
 
-# chunk <- 
-#   dt8 %>% 
-#   filter(country == "COL",
-#          geo == "Guainia",
-#          edu == "8-11",
-#          age == "40-54",
-#          imp_type == "n")
+chunk <-
+  dt %>%
+  filter(country == "COL",
+         geo == "Bogota",
+         edu == "8-11", 
+         age == "40-54",
+         imp_type == "n")
 
 # chunk <- 
 #   dt %>% 
@@ -298,9 +298,11 @@ pred_births <- function(chunk){
     )
   
   if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
-    chunk2 <- 
+      chunk2 <- 
       chunk %>% 
-      mutate(bsn = pred$fit) %>% 
+      mutate(bsn = pred$fit,
+             bsn_lc = bsn - 1.96 * pred$se,
+             bsn_uc = bsn + 1.96 * pred$se) %>% 
       left_join(simul_intvals_no_off(model, 
                                      model_type = "gam", 
                                      db = chunk, 
@@ -313,20 +315,36 @@ pred_births <- function(chunk){
     chunk2 <- 
       chunk %>% 
       mutate(bsn = pred$fit,
-             bsn_lp = NA,
-             bsn_up = NA)
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_80lp = NA,
+             bsn_80up = NA,
+             bsn_85lp = NA,
+             bsn_85up = NA, 
+             bsn_90lp = NA,
+             bsn_90up = NA)
   }
   
   if(class(test) == "try-error"){
-    chunk2 <- 
-      chunk %>% 
+    chunk2 <-
+      chunk %>%
       mutate(bsn = NA,
-             bsn_lp = NA,
-             bsn_up = NA)
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_80lp = NA,
+             bsn_80up = NA,
+             bsn_85lp = NA,
+             bsn_85up = NA, 
+             bsn_90lp = NA,
+             bsn_90up = NA)
   }
 
   return(chunk2)
 }
+
+
+
+
 
 simul_intvals_no_off <-
   function(
@@ -394,8 +412,12 @@ simul_intvals_no_off <-
                    names_to = 'sim_id', values_to = 'bsn_sim') %>%
       group_by(t) %>%
       summarise(
-        bsn_lp = quantile(bsn_sim, lp, na.rm = TRUE),
-        bsn_up = quantile(bsn_sim, up, na.rm = TRUE),
+        bsn_80lp = quantile(bsn_sim, 0.10, na.rm = TRUE),
+        bsn_80up = quantile(bsn_sim, 0.90, na.rm = TRUE),
+        bsn_85lp = quantile(bsn_sim, 0.075, na.rm = TRUE),
+        bsn_85up = quantile(bsn_sim, 0.925, na.rm = TRUE),
+        bsn_90lp = quantile(bsn_sim, lp, na.rm = TRUE),
+        bsn_90up = quantile(bsn_sim, up, na.rm = TRUE),
         .groups = 'drop'
       )
     

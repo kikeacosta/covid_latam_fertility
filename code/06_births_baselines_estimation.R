@@ -28,7 +28,8 @@ test <-
          age == "20-29") %>% 
   group_by(country, geo, age, edu, imp_type) %>%
   do(pred_births(chunk = .data)) %>% 
-  ungroup() %>% 
+  ungroup()
+%>% 
   mutate(bts = bts - 1,
          bsn = bsn - 1,
          bsn_lp = bsn_lp - 1,
@@ -42,6 +43,7 @@ test %>%
   geom_line(aes(date, bts, linetype = edu, group = edu), 
             col = "black")+
   geom_ribbon(aes(date, ymin = bsn_lp, ymax = bsn_up, group = edu), fill = "red", alpha = 0.2)+
+  geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc, group = edu), fill = "red", alpha = 0.4)+
   geom_line(aes(date, bsn, linetype = edu), col = "red")+
   geom_vline(xintercept = c(ymd("2019-12-31")), 
              linetype = "dashed")+
@@ -69,7 +71,9 @@ bsn <-
   do(pred_births(chunk = .data)) %>% 
   ungroup() %>% 
   mutate(bts = bts - 1,
-         bsn = bsn - 1,
+         bsn = bsn - 1)
+
+,
          bsn_lp = bsn_lp - 1,
          bsn_up = bsn_up - 1)
 
