@@ -13,8 +13,6 @@ codes <-
 dt <- 
   readRDS("data_inter/covid_tab_all_edu03.RDS") 
 
-<<<<<<< HEAD
-=======
 unique(dt$raw_country)
 unique(dt$raw_geo1nam)
 
@@ -50,7 +48,6 @@ dt %>%
   mutate(adj = bts_adj / bts)
 
 
->>>>>>> ee9f835a4c359baf2a315f2541294caf1d7586c9
 # MEX without state 
 # ~~~~~~~~~~~~~~~~~
 # births in MEX without state in 2020 and 2021
