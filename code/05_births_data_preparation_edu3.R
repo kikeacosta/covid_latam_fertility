@@ -19,6 +19,7 @@ unique(dt$raw_geo1nam)
 dt %>% 
   summarise(bts = sum(raw_nbirth))
 
+# looking at adjustments
 dt %>% 
   filter(raw_country == "MEX") %>%
   # filter(raw_yearbir > 2019) %>%
@@ -29,7 +30,23 @@ dt %>%
   filter(raw_country == "MEX") %>%
   # filter(raw_yearbir > 2019) %>% 
   group_by(raw_country, raw_yearbir) %>% 
-  summarise(bts = sum(raw_nbirth * cfactor))
+  summarise(bts_adj = sum(raw_nbirth * cfactor))
+
+# Mexico by year
+dt %>% 
+  filter(raw_country == "MEX") %>%
+  # filter(raw_yearbir > 2019) %>%
+  group_by(raw_country, raw_yearbir) %>% 
+  summarise(bts = sum(raw_nbirth)) %>% 
+  left_join(
+    dt %>% 
+      filter(raw_country == "MEX") %>%
+      # filter(raw_yearbir > 2019) %>% 
+      group_by(raw_country, raw_yearbir) %>% 
+      summarise(bts_adj = sum(raw_nbirth * cfactor))
+  ) %>% 
+  mutate(adj = bts_adj / bts)
+
 
 # MEX without state 
 # ~~~~~~~~~~~~~~~~~
@@ -50,11 +67,8 @@ dt %>%
 unique(dt$raw_geo1nam) %>% sort()
 
 
-
-
 # grouping regions and ages together ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 unique(dt$raw_mothag7)
 unique(dt$raw_edumo03)
 
@@ -84,12 +98,10 @@ dt2 <-
   summarise(bts = sum(bts)) %>% 
   ungroup()
 
-
-test <- 
-  dt2 %>% 
+# testing for duplicates
+dt2 %>% 
   group_by(country, geo, age, edu, year, mth) %>% 
-  summarise(n = n()) %>% 
-  ungroup()
+  filter(n() > 1)
 
 
 # ~~~~~~~~~~~~~~~~~~
@@ -156,7 +168,6 @@ imps <-
   select(-country, -geo) %>% 
   arrange(ct_geo, year, mth, edu, age, imp_type) %>% 
   mutate(year = year %>% as.integer())
-
 
 dt5 <- 
   imps %>% 
