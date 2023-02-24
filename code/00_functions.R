@@ -266,7 +266,7 @@ chunk <-
 #          age == "10-19",
 #          imp_type == "i")
 
-pred_births <- function(chunk){
+pred_births_round1 <- function(chunk, ns = 100){
   
   step <- 
     paste(unique(chunk$country), 
@@ -306,8 +306,8 @@ pred_births <- function(chunk){
       left_join(simul_intvals_no_off(model, 
                                      model_type = "gam", 
                                      db = chunk, 
-                                     nsim = 200,
-                                     p = 0.9),
+                                     nsim = ns,
+                                     p = c(.5, .6, .7, .8, .9)),
                 by = "t")
   }
   
@@ -317,12 +317,25 @@ pred_births <- function(chunk){
       mutate(bsn = pred$fit,
              bsn_lc = NA,
              bsn_uc = NA,
+<<<<<<< HEAD
              bsn_80lp = NA,
              bsn_80up = NA,
              bsn_85lp = NA,
              bsn_85up = NA, 
              bsn_90lp = NA,
              bsn_90up = NA)
+=======
+             bsn_lp1 = NA,
+             bsn_up1 = NA,
+             bsn_lp2 = NA,
+             bsn_up2 = NA,
+             bsn_lp3 = NA,
+             bsn_up3 = NA,
+             bsn_lp4 = NA,
+             bsn_up4 = NA,
+             bsn_lp5 = NA,
+             bsn_up5 = NA)
+>>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
   }
   
   if(class(test) == "try-error"){
@@ -331,12 +344,110 @@ pred_births <- function(chunk){
       mutate(bsn = NA,
              bsn_lc = NA,
              bsn_uc = NA,
+<<<<<<< HEAD
              bsn_80lp = NA,
              bsn_80up = NA,
              bsn_85lp = NA,
              bsn_85up = NA, 
              bsn_90lp = NA,
              bsn_90up = NA)
+=======
+             bsn_lp1 = NA,
+             bsn_up1 = NA,
+             bsn_lp2 = NA,
+             bsn_up2 = NA,
+             bsn_lp3 = NA,
+             bsn_up3 = NA,
+             bsn_lp4 = NA,
+             bsn_up4 = NA,
+             bsn_lp5 = NA,
+             bsn_up5 = NA)
+  }
+  
+  return(chunk2)
+}
+
+
+pred_births <- function(chunk, ns = 100){
+  
+  step <- 
+    paste(unique(chunk$country), 
+          unique(chunk$geo),
+          "edu",
+          unique(chunk$edu), 
+          "age",
+          unique(chunk$age), 
+          unique(chunk$imp_type),
+          sep = "_")
+  
+  cat(paste0(step, "\n"))
+  
+  try(
+    model <- 
+      gam(bts ~ t + s(mth, bs = 'cp'), 
+          weights = w,
+          data = chunk, 
+          family = "quasipoisson")
+  )
+  
+  test <- 
+    try(
+      pred <- 
+        predict(model, 
+                type = "response", 
+                se.fit = T,
+                newdata = chunk)
+    )
+  
+  if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = pred$fit,
+             bsn_lc = bsn - 1.96 * pred$se,
+             bsn_uc = bsn + 1.96 * pred$se) %>% 
+      left_join(simul_intvals_no_off(model, 
+                                     model_type = "gam", 
+                                     db = chunk, 
+                                     nsim = ns,
+                                     p = c(.5, .6, .7, .8, .9)),
+                by = "t")
+  }
+ 
+  if(class(test) != "try-error" & model$outer.info$conv != "full convergence"){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = pred$fit,
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_lp1 = NA,
+             bsn_up1 = NA,
+             bsn_lp2 = NA,
+             bsn_up2 = NA,
+             bsn_lp3 = NA,
+             bsn_up3 = NA,
+             bsn_lp4 = NA,
+             bsn_up4 = NA,
+             bsn_lp5 = NA,
+             bsn_up5 = NA)
+  }
+  
+  if(class(test) == "try-error" | !exists("model") | !exists("pred")){
+    chunk2 <- 
+      chunk %>% 
+      mutate(bsn = NA,
+             bsn_lc = NA,
+             bsn_uc = NA,
+             bsn_lp1 = NA,
+             bsn_up1 = NA,
+             bsn_lp2 = NA,
+             bsn_up2 = NA,
+             bsn_lp3 = NA,
+             bsn_up3 = NA,
+             bsn_lp4 = NA,
+             bsn_up4 = NA,
+             bsn_lp5 = NA,
+             bsn_up5 = NA)
+>>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
   }
 
   return(chunk2)
@@ -412,12 +523,25 @@ simul_intvals_no_off <-
                    names_to = 'sim_id', values_to = 'bsn_sim') %>%
       group_by(t) %>%
       summarise(
+<<<<<<< HEAD
         bsn_80lp = quantile(bsn_sim, 0.10, na.rm = TRUE),
         bsn_80up = quantile(bsn_sim, 0.90, na.rm = TRUE),
         bsn_85lp = quantile(bsn_sim, 0.075, na.rm = TRUE),
         bsn_85up = quantile(bsn_sim, 0.925, na.rm = TRUE),
         bsn_90lp = quantile(bsn_sim, lp, na.rm = TRUE),
         bsn_90up = quantile(bsn_sim, up, na.rm = TRUE),
+=======
+        bsn_lp1 = quantile(bsn_sim, lp[1], na.rm = TRUE),
+        bsn_up1 = quantile(bsn_sim, up[1], na.rm = TRUE),
+        bsn_lp2 = quantile(bsn_sim, lp[2], na.rm = TRUE),
+        bsn_up2 = quantile(bsn_sim, up[2], na.rm = TRUE),
+        bsn_lp3 = quantile(bsn_sim, lp[3], na.rm = TRUE),
+        bsn_up3 = quantile(bsn_sim, up[3], na.rm = TRUE),
+        bsn_lp4 = quantile(bsn_sim, lp[4], na.rm = TRUE),
+        bsn_up4 = quantile(bsn_sim, up[4], na.rm = TRUE),
+        bsn_lp5 = quantile(bsn_sim, lp[5], na.rm = TRUE),
+        bsn_up5 = quantile(bsn_sim, up[5], na.rm = TRUE),
+>>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
         .groups = 'drop'
       )
     
