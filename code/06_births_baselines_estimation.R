@@ -35,9 +35,6 @@ test <-
          age == "20-29") %>% 
   group_by(country, geo, age, edu, imp_type) %>%
   do(pred_births(chunk = .data)) %>% 
-<<<<<<< HEAD
-  ungroup()
-=======
   ungroup() 
 
 test %>% 
@@ -47,10 +44,10 @@ test %>%
   ggplot()+
   geom_line(aes(date, bts, linetype = edu, group = edu), 
             col = "black")+
-  geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc, group = edu), fill = "red", alpha = 0.5)+
-  geom_ribbon(aes(date, ymin = bsn_lp3, ymax = bsn_up3, group = edu), fill = "red", alpha = 0.2)+
+  # geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc, group = edu), fill = "red", alpha = 0.5)+
+  geom_ribbon(aes(date, ymin = bsn_lp1, ymax = bsn_up1, group = edu), fill = "#005f73", alpha = 0.2)+
   # geom_ribbon(aes(date, ymin = bsn_lp, ymax = bsn_up, group = edu), fill = "red", alpha = 0.2)+
-  geom_line(aes(date, bsn, linetype = edu), col = "red")+
+  geom_line(aes(date, bsn, linetype = edu), col = "#005f73", alpha = 0.7)+
   geom_vline(xintercept = c(ymd("2019-12-31")), 
              linetype = "dashed")+
   scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),

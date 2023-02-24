@@ -248,14 +248,13 @@ give_me_baseline <-
 
   }
 
-
-chunk <-
-  dt %>%
-  filter(country == "COL",
-         geo == "Bogota",
-         edu == "8-11", 
-         age == "40-54",
-         imp_type == "n")
+# chunk <-
+#   dt %>%
+#   filter(country == "COL",
+#          geo == "Bogota",
+#          edu == "8-11", 
+#          age == "40-54",
+#          imp_type == "n")
 
 # chunk <- 
 #   dt %>% 
@@ -317,14 +316,6 @@ pred_births_round1 <- function(chunk, ns = 100){
       mutate(bsn = pred$fit,
              bsn_lc = NA,
              bsn_uc = NA,
-<<<<<<< HEAD
-             bsn_80lp = NA,
-             bsn_80up = NA,
-             bsn_85lp = NA,
-             bsn_85up = NA, 
-             bsn_90lp = NA,
-             bsn_90up = NA)
-=======
              bsn_lp1 = NA,
              bsn_up1 = NA,
              bsn_lp2 = NA,
@@ -335,7 +326,6 @@ pred_births_round1 <- function(chunk, ns = 100){
              bsn_up4 = NA,
              bsn_lp5 = NA,
              bsn_up5 = NA)
->>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
   }
   
   if(class(test) == "try-error"){
@@ -344,14 +334,6 @@ pred_births_round1 <- function(chunk, ns = 100){
       mutate(bsn = NA,
              bsn_lc = NA,
              bsn_uc = NA,
-<<<<<<< HEAD
-             bsn_80lp = NA,
-             bsn_80up = NA,
-             bsn_85lp = NA,
-             bsn_85up = NA, 
-             bsn_90lp = NA,
-             bsn_90up = NA)
-=======
              bsn_lp1 = NA,
              bsn_up1 = NA,
              bsn_lp2 = NA,
@@ -447,14 +429,10 @@ pred_births <- function(chunk, ns = 100){
              bsn_up4 = NA,
              bsn_lp5 = NA,
              bsn_up5 = NA)
->>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
   }
 
   return(chunk2)
 }
-
-
-
 
 
 simul_intvals_no_off <-
@@ -523,14 +501,6 @@ simul_intvals_no_off <-
                    names_to = 'sim_id', values_to = 'bsn_sim') %>%
       group_by(t) %>%
       summarise(
-<<<<<<< HEAD
-        bsn_80lp = quantile(bsn_sim, 0.10, na.rm = TRUE),
-        bsn_80up = quantile(bsn_sim, 0.90, na.rm = TRUE),
-        bsn_85lp = quantile(bsn_sim, 0.075, na.rm = TRUE),
-        bsn_85up = quantile(bsn_sim, 0.925, na.rm = TRUE),
-        bsn_90lp = quantile(bsn_sim, lp, na.rm = TRUE),
-        bsn_90up = quantile(bsn_sim, up, na.rm = TRUE),
-=======
         bsn_lp1 = quantile(bsn_sim, lp[1], na.rm = TRUE),
         bsn_up1 = quantile(bsn_sim, up[1], na.rm = TRUE),
         bsn_lp2 = quantile(bsn_sim, lp[2], na.rm = TRUE),
@@ -541,7 +511,6 @@ simul_intvals_no_off <-
         bsn_up4 = quantile(bsn_sim, up[4], na.rm = TRUE),
         bsn_lp5 = quantile(bsn_sim, lp[5], na.rm = TRUE),
         bsn_up5 = quantile(bsn_sim, up[5], na.rm = TRUE),
->>>>>>> 8cc3232a28d27a4d493100d1ae64c2a8e1d44f2b
         .groups = 'drop'
       )
     

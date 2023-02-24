@@ -44,10 +44,10 @@ test2step <- function(ct = "COL",
   
   test_2step2 <- 
     test_2step1 %>% 
-    mutate(w = ifelse(w == 0 | bts > bsn_up1, 0, 1)) %>% 
     rename(old_bsn = bsn,
-           old_bsn_up1 = bsn_up1,
-           old_bsn_lp1 = bsn_lp1) %>% 
+           old_bsn_up = bsn_up1,
+           old_bsn_lp = bsn_lp1) %>% 
+    mutate(w = ifelse(w == 0 | bts > old_bsn_up, 0, 1)) %>% 
     select(-starts_with("bsn")) %>% 
     group_by(country, geo, age, edu, imp_type) %>%
     do(pred_births(chunk = .data, ns = 1000)) %>% 
@@ -59,17 +59,17 @@ test2step <- function(ct = "COL",
       ggplot()+
       geom_point(aes(date, bts, shape = in_fitt), col = "black", size = 1)+
       geom_line(aes(date, bts), col = "black", alpha = 0.1, linewidth = 0.3)+
-      geom_ribbon(aes(date, ymin = old_bsn_lp1, ymax = old_bsn_up1), fill = "grey80", alpha = 0.2)+
-      geom_line(aes(date, old_bsn_up1), col = "black", linetype = "dashed", alpha = 0.5, linewidth = 0.1)+
-      geom_line(aes(date, old_bsn_lp1), col = "black", linetype = "dashed", alpha = 0.5, linewidth = 0.1)+
+      geom_ribbon(aes(date, ymin = old_bsn_lp, ymax = old_bsn_up), fill = "grey80", alpha = 0.2)+
+      geom_line(aes(date, old_bsn_up), col = "black", linetype = "dashed", alpha = 0.5, linewidth = 0.1)+
+      geom_line(aes(date, old_bsn_lp), col = "black", linetype = "dashed", alpha = 0.5, linewidth = 0.1)+
       geom_line(aes(date, old_bsn), col = "black", linetype = "dashed", alpha = 0.5, linewidth = 0.3)+
-      geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc), fill = "#f72585", alpha = 0.3)+
-      geom_ribbon(aes(date, ymin = bsn_lp1, ymax = bsn_up1), fill = "red", alpha = 0.3)+
-      geom_ribbon(aes(date, ymin = bsn_lp3, ymax = bsn_up3), fill = "red", alpha = 0.2)+
-      geom_ribbon(aes(date, ymin = bsn_lp5, ymax = bsn_up5), fill = "red", alpha = 0.1)+
+      geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc), fill = "#f72585", alpha = 0.2)+
+      geom_ribbon(aes(date, ymin = bsn_lp1, ymax = bsn_up1), fill = "#d00000", alpha = 0.3)+
+      geom_ribbon(aes(date, ymin = bsn_lp3, ymax = bsn_up3), fill = "#d00000", alpha = 0.1)+
+      geom_ribbon(aes(date, ymin = bsn_lp5, ymax = bsn_up5), fill = "#d00000", alpha = 0.08)+
       geom_line(aes(date, bsn), col = "#780000", linewidth = 0.3)+
-      geom_line(aes(date, bsn_lc), col = "black", linetype = "dotted", alpha = 0.5, linewidth = 0.1)+
-      geom_line(aes(date, bsn_uc), col = "black", linetype = "dotted", alpha = 0.5, linewidth = 0.1)+
+      geom_line(aes(date, bsn_lp1), col = "black", linetype = "dotted", alpha = 0.5, linewidth = 0.1)+
+      geom_line(aes(date, bsn_up1), col = "black", linetype = "dotted", alpha = 0.5, linewidth = 0.1)+
       geom_vline(xintercept = c(ymd("2019-12-31")), linetype = "dashed")+
       scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
                    date_labels = "%Y")+
@@ -86,8 +86,6 @@ test2step <- function(ct = "COL",
 
 unique(dt$age)
 unique(dt$edu)
-
-
 
 test2step(ct = "COL", ge = "Choco", 
           ed = c("0-7" , "8-11", "12+"), 
@@ -137,33 +135,31 @@ all_geos_ages2 <-
 
 
 all_geos_ages2 %>%
-  ggplot()+
-  geom_line(aes(date, bts, linetype = edu, group = edu),
-            col = "black")+
-  geom_ribbon(aes(date, ymin = bsn_lp1, ymax = bsn_up1, group = edu), fill = "red", alpha = 0.3)+
-  geom_ribbon(aes(date, ymin = bsn_lp3, ymax = bsn_up3, group = edu), fill = "red", alpha = 0.3)+
+  mutate(country = case_when(country == "BRA" ~ "Brazil",
+                             country == "COL" ~ "Colombia",
+                             country == "MEX" ~ "Mexico")) %>% 
+  ggplot(aes(group = edu))+
+  geom_line(aes(date, bts, col = edu, group = edu), alpha = .6)+
+  geom_point(aes(date, bts, col = edu, group = edu), size = 0.6, alpha = .8)+
+  geom_ribbon(aes(date, ymin = bsn_lp1, ymax = bsn_up1, group = edu), fill = "#ef233c", alpha = 0.3)+
+  # geom_ribbon(aes(date, ymin = bsn_lp3, ymax = bsn_up3, group = edu), fill = "red", alpha = 0.3)+
   # geom_ribbon(aes(date, ymin = bsn_lp5, ymax = bsn_up5, group = edu), fill = "red", alpha = 0.2)+
-  geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc, group = edu), fill = "red", alpha = 0.2)+
-  geom_line(aes(date, bsn, linetype = edu), col = "red")+
+  # geom_ribbon(aes(date, ymin = bsn_lc, ymax = bsn_uc, group = edu), fill = "red", alpha = 0.2)+
+  geom_line(aes(date, bsn), col = "#ef233c")+
   geom_vline(xintercept = c(ymd("2015-01-01", "2019-12-31")),
              linetype = "dashed")+
   scale_x_date(breaks = seq(ymd('2010-01-01'),ymd('2022-01-01'), by = '1 year'),
                date_labels = "%Y")+
+  scale_color_manual(values = c("black", "grey60", "grey"))+
   facet_wrap(~country, scales = "free_y")+
-  theme_bw()
+  labs(y = "Births", x = "Months", col = "Education")+
+  theme_bw()+
+  theme()
 
 ggsave("figures/births_monthly_baseline_national_levels_all_ages1.png",
        w = 10,
        h = 5)
 
-
-
-
-
-
-# quick test with total national by educational level   ====
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 # estimating baselines for all combinations  ====
@@ -176,7 +172,8 @@ ggsave("figures/births_monthly_baseline_national_levels_all_ages1.png",
 # test function for 2-step estimation process
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-fitting2step <- function(chunk = .data, ns = 200){
+fitting2step <- 
+  function(chunk = .data, ns = 200){
   
   fitting2step1 <- 
     chunk %>% 
