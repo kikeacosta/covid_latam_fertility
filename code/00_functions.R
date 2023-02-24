@@ -15,6 +15,8 @@ if(!require("pacman", character.only = TRUE)) {
     stop("Package pacman not found")
 }
 library(pacman)
+
+# remove.packages("here")
 # Required CRAN packages
 pkgs <- c("tidyverse",
           "here",
@@ -25,18 +27,21 @@ pkgs <- c("tidyverse",
           "ggrepel",
           "ggridges")
 
+# non installed packages
+nons <- pkgs[!p_isinstalled(pkgs)]
+
 # Install required CRAN packages if not available yet
-if(sum(!p_isinstalled(c(pkgs)))!=0) {
-  for(i in 1:length(pkgs[!p_isinstalled(pkgs)])){
+if(length(nons) > 0) {
+  for(i in 1:length(nons)){
     p_install(
-      package = pkgs[!p_isinstalled(pkgs)][i], 
+      package = nons[i], 
       character.only = TRUE
     )
   }
 }
 
-# loading required packages
-# =========================
+# loading packages
+# ================
 p_load(pkgs, character.only = TRUE)
 
 # ====
@@ -250,11 +255,13 @@ give_me_baseline <-
 
 # chunk <-
 #   dt %>%
-#   filter(country == "COL",
-#          geo == "Bogota",
-#          edu == "8-11", 
-#          age == "40-54",
+#   filter(country == "MEX",
+#          geo == "Michoacan",
+#          edu == "12+",
+#          age == "20-29",
 #          imp_type == "n")
+
+# MEX_Michoacan_edu_12+_age_20-29_n
 
 # chunk <- 
 #   dt %>% 
@@ -265,89 +272,89 @@ give_me_baseline <-
 #          age == "10-19",
 #          imp_type == "i")
 
-pred_births_round1 <- function(chunk, ns = 100){
-  
-  step <- 
-    paste(unique(chunk$country), 
-          unique(chunk$geo),
-          "edu",
-          unique(chunk$edu), 
-          "age",
-          unique(chunk$age), 
-          unique(chunk$imp_type),
-          sep = "_")
-  
-  cat(paste0(step, "\n"))
-  
-  try(
-    model <- 
-      gam(bts ~ t + s(mth, bs = 'cp'), 
-          weights = w,
-          data = chunk, 
-          family = "quasipoisson")
-  )
-  
-  test <- 
-    try(
-      pred <- 
-        predict(model, 
-                type = "response", 
-                se.fit = T,
-                newdata = chunk)
-    )
-  
-  if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
-      chunk2 <- 
-      chunk %>% 
-      mutate(bsn = pred$fit,
-             bsn_lc = bsn - 1.96 * pred$se,
-             bsn_uc = bsn + 1.96 * pred$se) %>% 
-      left_join(simul_intvals_no_off(model, 
-                                     model_type = "gam", 
-                                     db = chunk, 
-                                     nsim = ns,
-                                     p = c(.5, .6, .7, .8, .9)),
-                by = "t")
-  }
-  
-  if(class(test) != "try-error" & model$outer.info$conv != "full convergence"){
-    chunk2 <- 
-      chunk %>% 
-      mutate(bsn = pred$fit,
-             bsn_lc = NA,
-             bsn_uc = NA,
-             bsn_lp1 = NA,
-             bsn_up1 = NA,
-             bsn_lp2 = NA,
-             bsn_up2 = NA,
-             bsn_lp3 = NA,
-             bsn_up3 = NA,
-             bsn_lp4 = NA,
-             bsn_up4 = NA,
-             bsn_lp5 = NA,
-             bsn_up5 = NA)
-  }
-  
-  if(class(test) == "try-error"){
-    chunk2 <-
-      chunk %>%
-      mutate(bsn = NA,
-             bsn_lc = NA,
-             bsn_uc = NA,
-             bsn_lp1 = NA,
-             bsn_up1 = NA,
-             bsn_lp2 = NA,
-             bsn_up2 = NA,
-             bsn_lp3 = NA,
-             bsn_up3 = NA,
-             bsn_lp4 = NA,
-             bsn_up4 = NA,
-             bsn_lp5 = NA,
-             bsn_up5 = NA)
-  }
-  
-  return(chunk2)
-}
+# pred_births_round1 <- function(chunk, ns = 100){
+#   
+#   step <- 
+#     paste(unique(chunk$country), 
+#           unique(chunk$geo),
+#           "edu",
+#           unique(chunk$edu), 
+#           "age",
+#           unique(chunk$age), 
+#           unique(chunk$imp_type),
+#           sep = "_")
+#   
+#   cat(paste0(step, "\n"))
+#   
+#   try(
+#     model <- 
+#       gam(bts ~ t + s(mth, bs = 'cp'), 
+#           weights = w,
+#           data = chunk, 
+#           family = "quasipoisson")
+#   )
+#   
+#   test <- 
+#     try(
+#       pred <- 
+#         predict(model, 
+#                 type = "response", 
+#                 se.fit = T,
+#                 newdata = chunk)
+#     )
+#   
+#   if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
+#       chunk2 <- 
+#       chunk %>% 
+#       mutate(bsn = pred$fit,
+#              bsn_lc = bsn - 1.96 * pred$se,
+#              bsn_uc = bsn + 1.96 * pred$se) %>% 
+#       left_join(simul_intvals_no_off(model, 
+#                                      model_type = "gam", 
+#                                      db = chunk, 
+#                                      nsim = ns,
+#                                      p = c(.5, .6, .7, .8, .9)),
+#                 by = "t")
+#   }
+#   
+#   if(class(test) != "try-error" & model$outer.info$conv != "full convergence"){
+#     chunk2 <- 
+#       chunk %>% 
+#       mutate(bsn = pred$fit,
+#              bsn_lc = NA,
+#              bsn_uc = NA,
+#              bsn_lp1 = NA,
+#              bsn_up1 = NA,
+#              bsn_lp2 = NA,
+#              bsn_up2 = NA,
+#              bsn_lp3 = NA,
+#              bsn_up3 = NA,
+#              bsn_lp4 = NA,
+#              bsn_up4 = NA,
+#              bsn_lp5 = NA,
+#              bsn_up5 = NA)
+#   }
+#   
+#   if(class(test) == "try-error"){
+#     chunk2 <-
+#       chunk %>%
+#       mutate(bsn = NA,
+#              bsn_lc = NA,
+#              bsn_uc = NA,
+#              bsn_lp1 = NA,
+#              bsn_up1 = NA,
+#              bsn_lp2 = NA,
+#              bsn_up2 = NA,
+#              bsn_lp3 = NA,
+#              bsn_up3 = NA,
+#              bsn_lp4 = NA,
+#              bsn_up4 = NA,
+#              bsn_lp5 = NA,
+#              bsn_up5 = NA)
+#   }
+#   
+#   return(chunk2)
+# }
 
 
 pred_births <- function(chunk, ns = 100){
@@ -381,7 +388,11 @@ pred_births <- function(chunk, ns = 100){
                 newdata = chunk)
     )
   
-  if(class(test) != "try-error" & model$outer.info$conv == "full convergence"){
+  if(class(test) != "try-error" & 
+     model$outer.info$conv == "full convergence" & 
+     exists("model") & 
+     exists("pred")){
+    
     chunk2 <- 
       chunk %>% 
       mutate(bsn = pred$fit,
@@ -395,7 +406,9 @@ pred_births <- function(chunk, ns = 100){
                 by = "t")
   }
  
-  if(class(test) != "try-error" & model$outer.info$conv != "full convergence"){
+  if(class(test) != "try-error" & 
+     model$outer.info$conv != "full convergence" &
+     exists("pred")){
     chunk2 <- 
       chunk %>% 
       mutate(bsn = pred$fit,
@@ -413,7 +426,9 @@ pred_births <- function(chunk, ns = 100){
              bsn_up5 = NA)
   }
   
-  if(class(test) == "try-error" | !exists("model") | !exists("pred")){
+  if(class(test) == "try-error" | 
+     !exists("model") | 
+     !exists("pred")){
     chunk2 <- 
       chunk %>% 
       mutate(bsn = NA,
