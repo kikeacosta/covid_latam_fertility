@@ -13,7 +13,23 @@ codes <-
 dt <- 
   readRDS("data_inter/covid_tab_all_edu03.RDS") 
 
+unique(dt$raw_country)
+unique(dt$raw_geo1nam)
 
+dt %>% 
+  summarise(bts = sum(raw_nbirth))
+
+dt %>% 
+  filter(raw_country == "MEX") %>%
+  # filter(raw_yearbir > 2019) %>%
+  group_by(raw_country, raw_yearbir) %>% 
+  summarise(bts = sum(raw_nbirth))
+
+dt %>% 
+  filter(raw_country == "MEX") %>%
+  # filter(raw_yearbir > 2019) %>% 
+  group_by(raw_country, raw_yearbir) %>% 
+  summarise(bts = sum(raw_nbirth * cfactor))
 
 # MEX without state 
 # ~~~~~~~~~~~~~~~~~
@@ -55,14 +71,24 @@ dt2 <-
          mth = raw_montbir,
          age = raw_mothag7, 
          edu = raw_edumo03,
+         cfactor,
          bts = raw_nbirth) %>% 
   mutate(age = case_when(age %in% c("10-14", "15-19") ~ "10-19",
                                  age %in% c("20-24", "25-29") ~ "20-29",
                                  age %in% c("30-34", "35-39") ~ "30-39",
                                  TRUE  ~ "40-54"),
-         age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54"))) %>% 
+         age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54")),
+         # bts = bts * cfactor
+         ) %>% 
   group_by(country, geo, age, edu, year, mth) %>% 
   summarise(bts = sum(bts)) %>% 
+  ungroup()
+
+
+test <- 
+  dt2 %>% 
+  group_by(country, geo, age, edu, year, mth) %>% 
+  summarise(n = n()) %>% 
   ungroup()
 
 
@@ -284,4 +310,12 @@ dt8 <-
   arrange(country, geo, date, edu, age, imp_type, date)
 
 write_rds(dt8, "data_inter/master_births_for_baseline_estimation.rds")
+
+
+test <- 
+  dt8 %>% 
+  group_by(country, geo, age, edu, year, mth, imp_type) %>% 
+  summarise(n = n()) %>% 
+  ungroup() %>% 
+  filter(n > 1)
 

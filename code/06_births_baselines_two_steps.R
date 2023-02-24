@@ -165,13 +165,10 @@ ggsave("figures/births_monthly_baseline_national_levels_all_ages1.png",
 # estimating baselines for all combinations  ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# 23 mins at home
-# 30 mins in hydra 11
-# 15 mins at the office
 
-# test function for 2-step estimation process
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# function for 2-step estimation
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 fitting2step <- 
   function(chunk = .data, ns = 200){
   
