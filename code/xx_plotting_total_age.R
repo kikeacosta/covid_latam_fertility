@@ -22,6 +22,7 @@ all_geos_ages2 <-
          imp_type == "i")
 
 unique(all_geos_ages2$edu)
+
 all_geos_ages2 %>%
   mutate(country = case_when(country == "BRA" ~ "Brazil",
                              country == "COL" ~ "Colombia",

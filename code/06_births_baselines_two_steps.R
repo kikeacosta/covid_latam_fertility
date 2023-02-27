@@ -216,7 +216,6 @@ bsn_out <-
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 write_rds(bsn_out, "data_inter/monthly_excess_births_bra_col_mex_edu03.rds")
 
-
 bsn_out %>%
   ggplot()+
   geom_point(aes(date, bts, shape = in_fitt), col = "black", size = 1)+
@@ -235,3 +234,4 @@ bsn_out %>%
                date_labels = "%Y")+
   facet_wrap(edu~age, scales = "free_y")+
   theme_bw()
+
