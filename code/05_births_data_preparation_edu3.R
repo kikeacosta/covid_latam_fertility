@@ -15,6 +15,8 @@ dt <-
 
 unique(dt$raw_country)
 unique(dt$raw_geo1nam)
+unique(dt$raw_mothag6)
+unique(dt$raw_edumo03)
 
 dt %>% 
   summarise(bts = sum(raw_nbirth))
@@ -72,7 +74,7 @@ unique(dt$raw_geo1nam) %>% sort()
 
 # grouping regions and ages together ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-unique(dt$raw_mothag7)
+unique(dt$raw_mothag6)
 unique(dt$raw_edumo03)
 
 dt2 <- 
@@ -86,17 +88,10 @@ dt2 <-
          geo,
          year = raw_yearbir, 
          mth = raw_montbir,
-         age = raw_mothag7, 
+         age = raw_mothag6, 
          edu = raw_edumo03,
          cfactor,
          bts = raw_nbirth) %>% 
-  mutate(age = case_when(age %in% c("10-14", "15-19") ~ "10-19",
-                                 age %in% c("20-24", "25-29") ~ "20-29",
-                                 age %in% c("30-34", "35-39") ~ "30-39",
-                                 TRUE  ~ "40-54"),
-         age = factor(age, levels = c("10-19", "20-29", "30-39", "40-54")),
-         # bts = bts * cfactor
-         ) %>% 
   group_by(country, geo, age, edu, year, mth) %>% 
   summarise(bts = sum(bts)) %>% 
   ungroup()
