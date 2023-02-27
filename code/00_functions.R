@@ -355,7 +355,13 @@ give_me_baseline <-
 #   
 #   return(chunk2)
 # }
-
+chunk <-
+  dt %>%
+  filter(country == "MEX",
+         geo == "Michoacan",
+         edu == "12+",
+         age == "20-29",
+         imp_type == "n")
 
 pred_births <- function(chunk, ns = 100){
   
@@ -378,7 +384,7 @@ pred_births <- function(chunk, ns = 100){
           data = chunk, 
           family = "quasipoisson")
   )
-  
+  if(exists("model")){
   test <- 
     try(
       pred <- 
@@ -387,7 +393,7 @@ pred_births <- function(chunk, ns = 100){
                 se.fit = T,
                 newdata = chunk)
     )
-  
+  }
   if(class(test) != "try-error" & 
      model$outer.info$conv == "full convergence" & 
      exists("model") & 
@@ -408,6 +414,7 @@ pred_births <- function(chunk, ns = 100){
  
   if(class(test) != "try-error" & 
      model$outer.info$conv != "full convergence" &
+     exists("model") &
      exists("pred")){
     chunk2 <- 
       chunk %>% 
