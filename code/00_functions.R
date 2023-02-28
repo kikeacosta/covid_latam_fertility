@@ -399,58 +399,66 @@ pred_births <- function(chunk, ns = 100){
      exists("model") & 
      exists("pred")){
     
-    chunk2 <- 
-      chunk %>% 
-      mutate(bsn = pred$fit,
-             bsn_lc = bsn - 1.96 * pred$se,
-             bsn_uc = bsn + 1.96 * pred$se) %>% 
-      left_join(simul_intvals_no_off(model, 
-                                     model_type = "gam", 
-                                     db = chunk, 
-                                     nsim = ns,
-                                     p = c(.5, .6, .7, .8, .9)),
-                by = "t")
+    try(
+      chunk2 <- 
+        chunk %>% 
+        mutate(bsn = pred$fit,
+               bsn_lc = bsn - 1.96 * pred$se,
+               bsn_uc = bsn + 1.96 * pred$se) %>% 
+        left_join(simul_intvals_no_off(model, 
+                                       model_type = "gam", 
+                                       db = chunk, 
+                                       nsim = ns,
+                                       p = c(.5, .6, .7, .8, .9)),
+                  by = "t")
+    )
   }
  
   if(class(test) != "try-error" & 
      model$outer.info$conv != "full convergence" &
      exists("model") &
      exists("pred")){
-    chunk2 <- 
-      chunk %>% 
-      mutate(bsn = pred$fit,
-             bsn_lc = NA,
-             bsn_uc = NA,
-             bsn_lp1 = NA,
-             bsn_up1 = NA,
-             bsn_lp2 = NA,
-             bsn_up2 = NA,
-             bsn_lp3 = NA,
-             bsn_up3 = NA,
-             bsn_lp4 = NA,
-             bsn_up4 = NA,
-             bsn_lp5 = NA,
-             bsn_up5 = NA)
+    
+    try(
+      chunk2 <- 
+        chunk %>% 
+        mutate(bsn = pred$fit,
+               bsn_lc = NA,
+               bsn_uc = NA,
+               bsn_lp1 = NA,
+               bsn_up1 = NA,
+               bsn_lp2 = NA,
+               bsn_up2 = NA,
+               bsn_lp3 = NA,
+               bsn_up3 = NA,
+               bsn_lp4 = NA,
+               bsn_up4 = NA,
+               bsn_lp5 = NA,
+               bsn_up5 = NA)
+    )
   }
   
   if(class(test) == "try-error" | 
      !exists("model") | 
      !exists("pred")){
-    chunk2 <- 
-      chunk %>% 
-      mutate(bsn = NA,
-             bsn_lc = NA,
-             bsn_uc = NA,
-             bsn_lp1 = NA,
-             bsn_up1 = NA,
-             bsn_lp2 = NA,
-             bsn_up2 = NA,
-             bsn_lp3 = NA,
-             bsn_up3 = NA,
-             bsn_lp4 = NA,
-             bsn_up4 = NA,
-             bsn_lp5 = NA,
-             bsn_up5 = NA)
+   
+    try(
+      chunk2 <- 
+        chunk %>% 
+        mutate(bsn = NA,
+               bsn_lc = NA,
+               bsn_uc = NA,
+               bsn_lp1 = NA,
+               bsn_up1 = NA,
+               bsn_lp2 = NA,
+               bsn_up2 = NA,
+               bsn_lp3 = NA,
+               bsn_up3 = NA,
+               bsn_lp4 = NA,
+               bsn_up4 = NA,
+               bsn_lp5 = NA,
+               bsn_up5 = NA)
+    )
   }
 
   return(chunk2)
