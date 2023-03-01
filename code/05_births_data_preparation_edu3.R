@@ -90,8 +90,7 @@ dt2 <-
          mth = raw_montbir,
          age = raw_mothag6, 
          edu = raw_edumo03,
-         cfactor,
-         bts = raw_nbirth) %>% 
+         bts = cbirths) %>% 
   group_by(country, geo, age, edu, year, mth) %>% 
   summarise(bts = sum(bts)) %>% 
   ungroup()
