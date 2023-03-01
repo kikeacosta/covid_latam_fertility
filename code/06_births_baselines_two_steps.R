@@ -189,13 +189,17 @@ fitting2step <-
     mutate(in_fitt = ifelse(w == 0, "exc", "inc"))
   
   return(fitting2step2)
-}
-dt <- 
-  dt %>%
-  filter(geo == "Michoacan")
+  }
+
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 # fitting the two-step ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+# # quick test
+# dt <-
+#   dt %>%
+#   filter(geo == "Michoacan")
+
 bsn_2stp <- 
   dt %>% 
   # adjusting births and all estimates by increasing them in 1 unit, 

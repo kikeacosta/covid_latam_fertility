@@ -325,5 +325,5 @@ test <-
   group_by(country, geo, age, edu, year, mth, imp_type) %>% 
   summarise(n = n()) %>% 
   ungroup() %>% 
-  filter(n > 1)
+  filter(n > 1); test
 
