@@ -355,13 +355,13 @@ give_me_baseline <-
 #   
 #   return(chunk2)
 # }
-chunk <-
-  dt %>%
-  filter(country == "MEX",
-         geo == "Michoacan",
-         edu == "12+",
-         age == "20-29",
-         imp_type == "n")
+# chunk <-
+#   dt %>%
+#   filter(country == "MEX",
+#          geo == "Michoacan",
+#          edu == "12+",
+#          age == "20-29",
+#          imp_type == "n")
 
 pred_births <- function(chunk, ns = 100){
   

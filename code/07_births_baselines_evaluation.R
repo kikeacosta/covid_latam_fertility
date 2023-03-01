@@ -14,6 +14,9 @@ bts2 <-
   left_join(geo_codes) %>% 
   filter(type %in% c("single", "group"),
          imp_type == "i") %>% 
+  select(-imp_type, -t, -w) %>% 
+  rename(bsn_lp = bsn_lp4,
+         bsn_up = bsn_up4) %>% 
   mutate(psc_unc = ifelse((bts > bsn_up | bts < bsn_lp) & date >= "2020-02-01", bts / bsn, 1),
          psc = bts / bsn)
   
