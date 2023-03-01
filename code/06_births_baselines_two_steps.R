@@ -190,8 +190,9 @@ fitting2step <-
   
   return(fitting2step2)
 }
-
-
+dt <- 
+  dt %>%
+  filter(geo == "Michoacan")
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
 # fitting the two-step ====
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
