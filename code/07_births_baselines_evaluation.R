@@ -14,12 +14,51 @@ bts2 <-
   left_join(geo_codes) %>% 
   filter(type %in% c("single", "group"),
          imp_type == "i") %>% 
-  select(-imp_type, -t, -w) %>% 
+  select(-imp_type, -t, -w)
+
+
+# evaluating sensitivity - specificity 
+uns <- 
+  bts2 %>% 
+  filter(date >= "2020-03-15") %>% 
+  mutate(psc = bts / bsn,
+         psc_unc50 = ifelse(bts > bsn_up1 | bts < bsn_lp1, bts / bsn, 1),
+         psc_unc60 = ifelse(bts > bsn_up2 | bts < bsn_lp2, bts / bsn, 1),
+         psc_unc70 = ifelse(bts > bsn_up3 | bts < bsn_lp3, bts / bsn, 1),
+         psc_unc80 = ifelse(bts > bsn_up4 | bts < bsn_lp4, bts / bsn, 1),
+         psc_unc90 = ifelse(bts > bsn_up5 | bts < bsn_lp5, bts / bsn, 1),
+         unc50 = ifelse(psc == psc_unc50, 1, 0),
+         unc60 = ifelse(psc == psc_unc60, 1, 0),
+         unc70 = ifelse(psc == psc_unc70, 1, 0),
+         unc80 = ifelse(psc == psc_unc80, 1, 0),
+         unc90 = ifelse(psc == psc_unc90, 1, 0)) %>% 
+  group_by(country) %>% 
+  summarise(in50 = mean(unc50, na.rm = T),
+            in60 = mean(unc60, na.rm = T),
+            in70 = mean(unc70, na.rm = T),
+            in80 = mean(unc80, na.rm = T),
+            in90 = mean(unc90, na.rm = T))
+
+
+
+%>% 
+  
+  
+  
   rename(bsn_lp = bsn_lp4,
          bsn_up = bsn_up4) %>% 
   mutate(psc_unc = ifelse((bts > bsn_up | bts < bsn_lp) & date >= "2020-02-01", bts / bsn, 1),
-         psc = bts / bsn)
+         psc = bts / bsn) %>% 
+  select(country, geo, date, year, mth, age, edu, bts, everything())
   
+
+
+
+
+
+
+
+
 
 tttt <- 
   bts2 %>% 
