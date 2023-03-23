@@ -38,7 +38,7 @@ labels_perc <-
   filter(date == max(date)) %>% 
   ungroup() %>% 
   select(country, edu, date, bsn) %>% 
-  mutate(label_perc = c("0.1%", "0.2%", "0.3%", "0.4%", "0.5%", "0.6%"))
+  mutate(label_perc = c("-0.2%", "-3.7%", "-6.9%", "6.3%", "0.6%", "-5.7%"))
 
 c3 <- brewer.pal(9, "YlOrRd")[c(4, 6, 8)]
 
